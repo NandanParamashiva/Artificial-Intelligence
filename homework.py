@@ -241,6 +241,7 @@ def PrintOutputToFile(GoalNodeId, NodeRepository, fd_output):
      elif parentNodeId < 0:
        # Something went wrong
        print('Error, Could not trace back the source from goal')
+       fd_output.close()
        exit()
      nodeId = parentNodeId
   while stackTraceBack:
@@ -273,7 +274,7 @@ def BFSSearch(_input_params):
       print('Failed to find the solution.\n')
       fd_output.close()
       return
-    currnode = openList.popleft()
+    currnode = openList.popleft() # Always remove from front
     if currnode.GetState() == _input_params.GetGoalState():
       # We reached the goal
       PrintOutputToFile(currnode.GetNodeId(), NodeRepository, fd_output)
@@ -299,7 +300,50 @@ def BFSSearch(_input_params):
   
 
 def DFSSearch(_input_params):
-  print 'TODO'
+  """ Implements and outputs DFS search results """
+  global ROOTNODEID
+  nodeCount = 1
+  fd_output = open('output.txt', 'w')
+  if _input_params.GetStartState() == _input_params.GetGoalState():
+    fd_output.write('%s %d\n'%(_input_params.GetStartState(), 0) )
+    fd_output.close()
+    return
+  openList = deque() #Stack of nodes. But removed from front
+  closedList = [] #List of nodes
+  NodeRepository = {}
+  RootNode = _Node()
+  #TODO: IMP. setting parent's node Id as ROOTNODEID for rootnode. 
+  RootNode.SetNodeValues(nodeCount, _input_params.GetStartState(), 0, ROOTNODEID)
+  nodeCount += 1
+  openList.appendleft(RootNode)
+  NodeRepository[RootNode.GetNodeId()] = RootNode
+  while 1:
+    if len(openList) == 0:
+      print('Failed to find the solution.\n')
+      fd_output.close()
+      return
+    currnode = openList.popleft() # Always remove from front
+    if currnode.GetState() == _input_params.GetGoalState():
+      # We reached the goal
+      PrintOutputToFile(currnode.GetNodeId(), NodeRepository, fd_output)
+      return
+    closedList.append(currnode)
+    children = Expand(_input_params, currnode)
+    if children is not None:
+      # To make sure highest priority child is at the top of stack, we reverse
+      for child in reversed(children):
+        state = child[0]
+        cost = child[1]
+        # To avoid loops
+        if(((not IsStateExist(state, openList)) and (not IsStateExist(state, closedList))) or 
+           (state == _input_params.GetGoalState())): #should let multiple goalstate be in openlist, else we will go wrong
+          node = _Node()
+          g = currnode.GetG() + cost
+          node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
+          nodeCount += 1
+          openList.appendleft(node) # LIFO for DFS
+          NodeRepository[node.GetNodeId()] = node
+  fd_output.close()
 
 
 def UCSSearch(_input_params):
