@@ -335,8 +335,8 @@ def DFSSearch(_input_params):
         state = child[0]
         cost = child[1]
         # To avoid loops
-        if(((not IsStateExist(state, openList)) and (not IsStateExist(state, closedList))) or 
-           (state == _input_params.GetGoalState())): #should let multiple goalstate be in openlist, else we will go wrong
+        if((not IsStateExist(state, openList)) and 
+           (not IsStateExist(state, closedList))):
           node = _Node()
           g = currnode.GetG() + cost
           node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
