@@ -5,6 +5,7 @@ from collections import deque
 
 _DEBUG_ENABLE = True
 OFFSETLIVETRAFFIC = 4
+ROOTNODEID = -100
 ALGOS = ('BFS', 'DFS', 'UCS', 'A*')
 
 def Debug_print(msg):
@@ -208,6 +209,8 @@ def Expand(_input_params, currnode):
       The returned list is the order of occurence in input.txt 
       Example return value : [(B,5),(C,3)] """
   currnodeState = currnode.GetState()
+  if currnodeState not in _input_params.dict_live_traffic :
+    return None    
   children = list(_input_params.dict_live_traffic[currnodeState])
   return children
  
@@ -225,25 +228,31 @@ def IsStateExist(state, List):
 def PrintOutputToFile(GoalNodeId, NodeRepository, fd_output):
   """ Traces back the path from the goal to the source
       and prints the same to the output.txt file"""
+  global ROOTNODEID
   stackTraceBack = []
   nodeId = GoalNodeId
   while 1:
      node = NodeRepository[nodeId]
      stackTraceBack.append('%s %d\n'%(node.GetState(), node.GetG()) )
      parentNodeId = node.GetParentNodeID()
-     if parentNodeId == -100:
+     if parentNodeId == ROOTNODEID:
        # Means node now is root, hence break
-       break 
+       break
+     elif parentNodeId < 0:
+       # Something went wrong
+       print('Error, Could not trace back the source from goal')
+       exit()
      nodeId = parentNodeId
   while stackTraceBack:
     line = stackTraceBack.pop()
     fd_output.write(line)
-    print line,
+    #print line,
   fd_output.close()
 
 
 def BFSSearch(_input_params):
   """ Implements and outputs BFS search results """
+  global ROOTNODEID
   nodeCount = 1
   fd_output = open('output.txt', 'w')
   if _input_params.GetStartState() == _input_params.GetGoalState():
@@ -254,8 +263,8 @@ def BFSSearch(_input_params):
   closedList = [] #List of nodes
   NodeRepository = {}
   RootNode = _Node()
-  #TODO: IMP. setting parent's node Id as -100 for rootnode. 
-  RootNode.SetNodeValues(nodeCount, _input_params.GetStartState(), 0, -100)
+  #TODO: IMP. setting parent's node Id as ROOTNODEID for rootnode. 
+  RootNode.SetNodeValues(nodeCount, _input_params.GetStartState(), 0, ROOTNODEID)
   nodeCount += 1
   openList.append(RootNode)
   NodeRepository[RootNode.GetNodeId()] = RootNode
@@ -271,18 +280,20 @@ def BFSSearch(_input_params):
       return
     closedList.append(currnode)
     children = Expand(_input_params, currnode)
-    for i in range(len(children)):
-      child = children[i]
-      state = child[0]
-      cost = child[1]
-      if ((not IsStateExist(state, openList)) and 
-         (not IsStateExist(state, closedList))):
-        node = _Node()
-        g = currnode.GetG() + cost
-        node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
-        nodeCount += 1
-        openList.append(node) # FIFO for BFS
-        NodeRepository[node.GetNodeId()] = node
+    if children is not None:
+      for i in range(len(children)):
+        child = children[i]
+        state = child[0]
+        cost = child[1]
+        # To avoid loops
+        if ((not IsStateExist(state, openList)) and 
+           (not IsStateExist(state, closedList))):
+          node = _Node()
+          g = currnode.GetG() + cost
+          node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
+          nodeCount += 1
+          openList.append(node) # FIFO for BFS
+          NodeRepository[node.GetNodeId()] = node
   fd_output.close()
   
   
@@ -302,7 +313,7 @@ def ASTARSearch(_input_params):
 def main():
   _input_params = _InputParams()
   ParseInputFile(_input_params)
-  _input_params.DisplayInputParams()
+  #_input_params.DisplayInputParams()
   searchAlgo = _input_params.GetAlgo()
   if searchAlgo == 'BFS':
     BFSSearch(_input_params)
