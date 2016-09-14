@@ -395,36 +395,33 @@ def UCSSearch(_input_params):
       # We reached the goal
       PrintOutputToFile(currnode.GetNodeId(), NodeRepository, fd_output)
       return
-    
     children = Expand(_input_params, currnode)
     if children is not None:
       for i in range(len(children)):
         child = children[i]
         state = child[0]
         cost = child[1]
+        g = currnode.GetG() + cost
         # To avoid loops
         if ((not IsStateExist(state, openList)) and
            (not IsStateExist(state, closedList))):
           node = _Node()
-          g = currnode.GetG() + cost
           node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
           nodeCount += 1
           openList.append(node) # Insert at the End. See stability of sorted() in python.
           NodeRepository[node.GetNodeId()] = node
         elif (IsStateExist(state, openList)):
-          if (cost < PathCostNode(state, openList)):
+          if (g < PathCostNode(state, openList)):
             DeleteNode(state, openList)
             node = _Node()
-            g = currnode.GetG() + cost
             node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
             nodeCount += 1
             openList.append(node) # Insert at the End. See stability of sorted() in python.
             NodeRepository[node.GetNodeId()] = node
         elif (IsStateExist(state, closedList)):
-          if (cost < PathCostNode(state, closedList)):
+          if (g < PathCostNode(state, closedList)):
             DeleteNode(state, closedList)
             node = _Node()
-            g = currnode.GetG() + cost
             node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
             nodeCount += 1
             openList.append(node) # Insert at the End. See stability of sorted() in python.
