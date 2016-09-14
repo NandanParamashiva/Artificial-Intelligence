@@ -346,8 +346,92 @@ def DFSSearch(_input_params):
   fd_output.close()
 
 
+def PathCostNode(state, List):
+  """ Returns the path cost of Node with state (argument-1) in List (argument-2) """
+  for node in List:
+    if node.GetState() == state:
+      return node.GetG()
+  # Could not find the state
+  print('Error, couldnot find the state %s'%(state))
+  return  
+
+
+def DeleteNode(state, List):
+  """ Delets the node with state (argument-1) from the List (argument-2)"""
+  for node in List:
+    if node.GetState() == state:
+      List.remove(node)
+      return
+  # Could not find the state
+  print('Error, couldnot find the state %s'%(state))
+  return
+
+
 def UCSSearch(_input_params):
-  print 'TODO'
+  """ Implements and outputs UCS search results """
+  global ROOTNODEID
+  nodeCount = 1
+  fd_output = open('output.txt', 'w')
+  if _input_params.GetStartState() == _input_params.GetGoalState():
+    fd_output.write('%s %d\n'%(_input_params.GetStartState(), 0) )
+    fd_output.close()
+    return
+  openList = [] #Sorted List of nodes (Frontier)
+  closedList = [] #Explored List of nodes
+  NodeRepository = {}
+  RootNode = _Node()
+  #TODO: IMP. setting parent's node Id as ROOTNODEID for rootnode. 
+  RootNode.SetNodeValues(nodeCount, _input_params.GetStartState(), 0, ROOTNODEID)
+  nodeCount += 1
+  openList.append(RootNode)
+  NodeRepository[RootNode.GetNodeId()] = RootNode
+  while 1:
+    if len(openList) == 0:
+      print('Failed to find the solution.\n')
+      fd_output.close()
+      return
+    currnode = openList.pop(0) # Always remove from front
+    if currnode.GetState() == _input_params.GetGoalState():
+      # We reached the goal
+      PrintOutputToFile(currnode.GetNodeId(), NodeRepository, fd_output)
+      return
+    
+    children = Expand(_input_params, currnode)
+    if children is not None:
+      for i in range(len(children)):
+        child = children[i]
+        state = child[0]
+        cost = child[1]
+        # To avoid loops
+        if ((not IsStateExist(state, openList)) and
+           (not IsStateExist(state, closedList))):
+          node = _Node()
+          g = currnode.GetG() + cost
+          node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
+          nodeCount += 1
+          openList.append(node) # Insert at the End. See stability of sorted() in python.
+          NodeRepository[node.GetNodeId()] = node
+        elif (IsStateExist(state, openList)):
+          if (cost < PathCostNode(state, openList)):
+            DeleteNode(state, openList)
+            node = _Node()
+            g = currnode.GetG() + cost
+            node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
+            nodeCount += 1
+            openList.append(node) # Insert at the End. See stability of sorted() in python.
+            NodeRepository[node.GetNodeId()] = node
+        elif (IsStateExist(state, closedList)):
+          if (cost < PathCostNode(state, closedList)):
+            DeleteNode(state, closedList)
+            node = _Node()
+            g = currnode.GetG() + cost
+            node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId())
+            nodeCount += 1
+            openList.append(node) # Insert at the End. See stability of sorted() in python.
+            NodeRepository[node.GetNodeId()] = node
+    closedList.append(currnode)
+    openList.sort(key=lambda i: i.g)
+  fd_output.close()
 
 
 def ASTARSearch(_input_params):
