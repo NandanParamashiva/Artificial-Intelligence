@@ -23,12 +23,14 @@ class _Node(object):
     self.state = None
     self.g = -1 #cost
     self.parentNodeId = -1
+    self.f = 0
 
-  def SetNodeValues(self, nodeId, state, g, parentNodeId):
+  def SetNodeValues(self, nodeId, state, g, parentNodeId, f=0):
     self.nodeId = nodeId
     self.state = state
     self.g = g
     self.parentNodeId = parentNodeId
+    self.f = f
 
   def GetNodeId(self):
       return self.nodeId
@@ -42,6 +44,8 @@ class _Node(object):
   def GetParentNodeID(self):
       return self.parentNodeId
 
+  def GetF(self):
+      return self.f
 
 class _InputParams(object):
   """ Maintains the parameters specified in input.txt """
@@ -431,8 +435,80 @@ def UCSSearch(_input_params):
   fd_output.close()
 
 
+def FCostNode(state, List):
+  """ Returns the f cost of Node with state (argument-1) in List (argument-2) """
+  for node in List:
+    if node.GetState() == state:
+      return node.GetF()
+  # Could not find the state
+  print('Error, couldnot find the state %s'%(state))
+  return
+
+
 def ASTARSearch(_input_params):
-  print 'TODO'
+  """ Implements and outputs A* search results """
+  global ROOTNODEID
+  nodeCount = 1
+  fd_output = open('output.txt', 'w')
+  if _input_params.GetStartState() == _input_params.GetGoalState():
+    fd_output.write('%s %d\n'%(_input_params.GetStartState(), 0) )
+    fd_output.close()
+    return
+  openList = [] #Sorted List of nodes (Frontier)
+  closedList = [] #Explored List of nodes
+  NodeRepository = {}
+  RootNode = _Node()
+  #TODO: IMP. setting parent's node Id as ROOTNODEID for rootnode. 
+  RootNode.SetNodeValues(nodeCount, _input_params.GetStartState(), 0, ROOTNODEID, 
+                         _input_params.dict_sunday_traffic[_input_params.GetStartState()])
+  nodeCount += 1
+  openList.append(RootNode)
+  NodeRepository[RootNode.GetNodeId()] = RootNode
+  while 1:
+    if len(openList) == 0:
+      print('Failed to find the solution.\n')
+      fd_output.close()
+      return
+    currnode = openList.pop(0) # Always remove from front
+    if currnode.GetState() == _input_params.GetGoalState():
+      # We reached the goal
+      PrintOutputToFile(currnode.GetNodeId(), NodeRepository, fd_output)
+      return
+    children = Expand(_input_params, currnode)
+    if children is not None:
+      for i in range(len(children)):
+        child = children[i]
+        state = child[0]
+        cost = child[1]
+        g = currnode.GetG() + cost
+        f = g + _input_params.dict_sunday_traffic[state]
+        # To avoid loops
+        if ((not IsStateExist(state, openList)) and
+           (not IsStateExist(state, closedList))):
+          node = _Node()
+          node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId(), f)
+          nodeCount += 1
+          openList.append(node) # Insert at the End. See stability of sorted() in python.
+          NodeRepository[node.GetNodeId()] = node
+        elif (IsStateExist(state, openList)):
+          if (f < FCostNode(state, openList)):
+            DeleteNode(state, openList)
+            node = _Node()
+            node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId(), f)
+            nodeCount += 1
+            openList.append(node) # Insert at the End. See stability of sorted() in python.
+            NodeRepository[node.GetNodeId()] = node
+        elif (IsStateExist(state, closedList)):
+          if (f < FCostNode(state, closedList)):
+            DeleteNode(state, closedList)
+            node = _Node()
+            node.SetNodeValues(nodeCount, state, g, currnode.GetNodeId(), f)
+            nodeCount += 1
+            openList.append(node) # Insert at the End. See stability of sorted() in python.
+            NodeRepository[node.GetNodeId()] = node
+    closedList.append(currnode)
+    openList.sort(key=lambda i: i.f) # sort based on f values
+  fd_output.close()
 
 
 def main():
