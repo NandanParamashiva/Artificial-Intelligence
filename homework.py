@@ -2,6 +2,7 @@
 
 from sys import exit
 from collections import deque
+import re
 
 _DEBUG_ENABLE = True
 OFFSETLIVETRAFFIC = 4
@@ -127,7 +128,10 @@ class _InputParams(object):
         exit()
       src = temp[0]
       dst = temp[1]
-      pathcost = int(temp[2])
+      try:
+        pathcost = int(temp[2])
+      except ValueError:
+        pathcost = int(re.sub(r'[^\d-]+','',temp[2]))
       if self.GetAlgo() == 'BFS' or self.GetAlgo() == 'DFS':
         pathcost = 1
       if src not in self.dict_live_traffic:
@@ -169,7 +173,7 @@ class _InputParams(object):
 
 def ParseInputFile(_input_params):
   """ Parses the input file """
-  fd_input = open('input.txt', 'r')
+  fd_input = open('input.txt', 'rU')
   lines = fd_input.read().split('\n')
   #print(lines)
 
