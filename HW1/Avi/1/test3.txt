@@ -1,0 +1,16 @@
+BFS
+A
+H
+10
+A C 1
+A D 1
+B C 1
+C F 1
+C G 1
+D G 1
+D H 1
+D E 1
+F B 1
+H E 1
+1
+A 0

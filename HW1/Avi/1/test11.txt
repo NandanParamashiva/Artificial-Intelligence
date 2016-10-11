@@ -1,0 +1,26 @@
+UCS
+S
+C
+20
+S A 21
+S A 2
+S B 17
+S C 30
+S D 12
+A S 17
+B S 12
+C S 5
+D S 18
+A B 12
+A C 6
+A D 13
+B A 11
+C A 9
+D A 31
+B C 17
+B D 7
+C B 8
+D B 26
+C D 32
+1
+A 0

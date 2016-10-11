@@ -1,0 +1,13 @@
+UCS
+S
+G
+7
+S B 10
+S A 10
+B D 10
+A C 5
+C D 5
+C G 7
+D G 2
+1
+A 1

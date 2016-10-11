@@ -1,0 +1,19 @@
+A*
+S
+G
+7
+S A 1
+S D 2
+A B 2
+D E 3
+B C 3
+C G 4
+E G 2
+7
+S 10
+A 4
+B 2
+C 4
+G 0
+D 4
+E 2

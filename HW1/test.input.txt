@@ -1,0 +1,15 @@
+BFS
+A
+D
+9
+B E 5
+A E 5
+A B 2
+B C 1
+A D 4
+B D 4
+C D 4
+A C 3
+C E 3
+6
+junk

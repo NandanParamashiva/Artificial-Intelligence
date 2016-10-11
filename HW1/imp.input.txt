@@ -1,0 +1,11 @@
+BFS
+X
+G
+6
+X B 2
+X C 3
+C G 1
+B L 4
+B G 5
+C K 6
+12

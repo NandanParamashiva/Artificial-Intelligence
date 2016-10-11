@@ -1,0 +1,30 @@
+DFS
+A
+H
+12
+A B 4
+A E 3
+A I 2
+B C 3
+C D 4
+E F 2
+F G 2
+G H 2
+I J 2
+J K 2
+K L 2
+L H 1
+11
+A 4
+B 3
+C 3
+D 3
+E 1
+F 2
+G 1
+I 4
+J 2
+K 1
+L 1
+H 0
+

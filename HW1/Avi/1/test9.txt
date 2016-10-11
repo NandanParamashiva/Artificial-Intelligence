@@ -1,0 +1,54 @@
+BFS
+Oradea
+Vaslui
+46
+Oradea Zerind 71
+Zerind Arad 75
+Arad Timisoara 118
+Timisoara Lugoj 111
+Lugoj Mehadia 70
+Mehadia Drobeta 75
+Drobeta Craiova 120
+Craiova Pitesti 138
+Craiova Rimnieu 146
+Rimnieu Pitesti 97
+Rimnieu Sibiu 80
+Arad Sibiu 140
+Oradea Sibiu 151
+Sibiu Fagras 99
+Fagras Bucharest 211
+Pitesti Bucharest 101
+Bucharest Giurgiu 90
+Bucharest Urziceni 85
+Urziceni Hirsova 98
+Hirsova Eforie 86
+Urziceni Vaslui 142
+Vaslui Iasi 92
+Iasi Neamt 87
+Zerind Oradea 71
+Arad Zerind 75
+Timisoara Arad 118
+Lugoj Timisoara 111
+Mehadia Lugoj 70
+Drobeta Mehadia 75
+Drobeta Craiova 120
+Pitesti Craiova 138
+Rimnieu Craiova 146
+Pitesti Rimnieu 97
+Sibiu Rimnieu 80
+Sibiu Arad 140
+Sibiu Oradea 151
+Fagras Sibiu 99
+Bucharest Fagras 211
+Bucharest Pitesti 101
+Giurgiu Bucharest 90
+Urziceni Bucharest 85
+Hirsova Urziceni 98
+Eforie Hirsova 86
+Vaslui Urziceni 142
+Iasi Vaslui 92
+Neamt Iasi 87
+1
+Neamt 0
+
+
