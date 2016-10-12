@@ -4,6 +4,8 @@ import sys
 MODES = ('MINIMAX', 'ALPHABETA', 'COMPETITION')
 YOUPLAYS = ('X', 'O', 'x', 'o')
 _DEBUG_ENABLE = True
+MAX_GAMESCORE = 133850
+MIN_GAMESCORE = -MAX_GAMESCORE
 
 def Debug_print(msg):
   """ Method to print the debug messages """
@@ -11,6 +13,23 @@ def Debug_print(msg):
   if _DEBUG_ENABLE is True:
     print 'DEBUG:'+ msg
 
+
+class _Node(object):
+  """ Stores the state information """
+  def __init__(self):
+    self.n = 0
+    self.state = []
+    self.gamescore = 0
+    self.stake_children_list = []
+    self.raid_children_list = []
+
+  def DisplayNode(self):
+    print 'gamescore:%d'%self.gamescore
+    for row in range(self.n):
+      for column in range(self.n):
+        #sys.stdout.write('%s'%self.state[row][column])
+        print self.state[row][column],
+      print
 
 class _Input(object):
   """ Stores the input.txt """
@@ -70,21 +89,32 @@ class _Input(object):
       for column in range(len(self.cellvalues[row])):
         #print self.cellvalues[row][column],None
         sys.stdout.write('%d '%self.cellvalues[row][column])
-      print '\n'
+      print 
     for row in range(len(self.boardstate)):
       for column in range(len(self.boardstate[row])):
         #print self.cellvalues[row][column],None
         sys.stdout.write('%s '%self.boardstate[row][column])
-      print '\n'
+      print 
     print'****************************************' 
+
+
+def BuildRootNode(_input, rootNode):
+  """ Builds the root node """
+  rootNode.n = _input.n
+  for row in range(_input.n):
+    local_list = []
+    for column in range(_input.n):
+      local_tuple = (_input.cellvalues[row][column], _input.boardstate[row][column])
+      local_list.append(local_tuple)
+    rootNode.state.append(local_list)
 
 
 def ParseInputFile(_input):
   """ Parses the input file """
   fd_input = open('input.txt', 'rU')
   lines = fd_input.read().split('\n')
-  #print(lines)
-  print 'len:%d'%len(lines)
+  print(lines)
+  #print 'len:%d'%len(lines)
   try:
     n = int(lines[0])
     _input.n = n
@@ -119,6 +149,9 @@ def main():
   _input = _Input()
   ParseInputFile(_input)
   _input.Display_Input()
+  rootNode = _Node()
+  BuildRootNode(_input, rootNode)
+  rootNode.DisplayNode()
 
 
 if __name__ == '__main__':
