@@ -85,7 +85,6 @@ def ParseInputFile(_input):
   lines = fd_input.read().split('\n')
   #print(lines)
   print 'len:%d'%len(lines)
-  
   try:
     n = int(lines[0])
     _input.n = n
@@ -93,24 +92,18 @@ def ParseInputFile(_input):
     Debug_print('Error, Parsing input.txt')
     fd_input.close()
     exit()
-
-  #for i in range(_input.n):
-  #  _input.cellvalues[i] = []
-
   mode = lines[1]
   if mode not in MODES:
     Debug_print('Error, Parsing mode in input.txt')
     fd_input.close()
     exit()
   _input.mode = mode
-  
   youplay = lines[2]
   if youplay not in YOUPLAYS:
     Debug_print('Error, Parsing youplay in input.txt')
     fd_input.close()
     exit()
   _input.youplay = youplay 
-  
   try:
     depth = int(lines[3])
     _input.depth = depth
@@ -118,7 +111,6 @@ def ParseInputFile(_input):
     Debug_print('Error, Parsing input.txt')
     fd_input.close()
     exit() 
-
   _input.BuildCellValues(lines)
   _input.BuildBoardState(lines)
 
@@ -127,6 +119,7 @@ def main():
   _input = _Input()
   ParseInputFile(_input)
   _input.Display_Input()
+
 
 if __name__ == '__main__':
   main()
