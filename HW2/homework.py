@@ -40,11 +40,38 @@ class _Node(object):
           oponentScore = oponentScore + self.state[row][column][0]
     self.gamescore = NodeplayerScore - oponentScore
 
+  def makeNode(self, newrow, newcolumn, _input):
+      """ returns a newNode.
+      input:  - newrow/newcolumn:Position where the current player i.e
+                the Nodeplayer wants to move(raid)/create(stake). Hence,
+                if self.Nodeplayer is X then the above new position is
+                marked with X
+              - Note that newNode's Nodeplayer is swapped.
+      output: - stake and raid children list is still empty.
+              - gamescore is populated only if its the leaf children.
+              - Rest of the elements of _Node() are populated """
+      newNode = _Node()
+      newNode.n = self.n
+      newNode.depth = self.depth+1
+      newNode.state = copy.deepcopy(self.state)
+      if self.Nodeplayer in ('X','x'):
+        newNode.state[newrow][newcolumn][1] = 'X'
+        newNode.Nodeplayer = 'O'
+      elif self.Nodeplayer in ('O','o'):
+        newNode.state[newrow][newcolumn][1] = 'O'
+        newNode.Nodeplayer = 'X'
+      else:
+        print 'Something went wrong in Boardstate'
+      if newNode.depth == _input.depth :
+        newNode.CalculateGameScore()
+      return newNode
+
   def BuildStakeChildrenList(self, _input):
     for row in range(self.n):
       for column in range(self.n):
         if self.state[row][column][1] == '.':
           # Here we realize that there exists a child
+          """
           newNode = _Node()
           newNode.n = self.n
           newNode.depth = self.depth+1
@@ -59,11 +86,96 @@ class _Node(object):
             print 'Something went wrong in Boardstate'
           if newNode.depth == _input.depth : 
             newNode.CalculateGameScore()
+          """
+          newNode = self.makeNode(row, column, _input)
           self.stake_children_list.append(newNode) 
 
-  def BuildRaidChildrenList(self):
-     """ TODO """
+  def isLocationEmpty(self, newLoc):
+    """ returns True if newLoc(tuple) is empty """
+    row = newLoc[0]
+    column = newLoc[1]
+    if self.state[row][column][1] == '.':
+      return True
+    else:
+      return False
 
+  def isValidLocation(self, newLoc):
+    """ Returns True if newLoc is valid """
+    row = newLoc[0]
+    column = newLoc[1]
+    if ((row < 0) or (row >= self.n)):
+      return False
+    elif ((column < 0) or (column >= self.n)):
+      return False
+    else:
+      return True
+
+  def getAdjacentLocation(self, row, column):
+    """ Returns the adjacent locations of (row,column).
+        New locations are tuple of tuple (up,down,left,right) i.e
+       ((row,column),(row,column)..) """
+    up = (row-1,column)
+    down = (row+1,column)
+    left = (row,column-1)
+    right = (row,column+1)
+    return (up,down,left,right)
+
+  def isOccupiedByOpponent(self, newLoc, opponent):
+    """ Returns True if newLoc is occupied by opponent """
+    newrow = newLoc[0]
+    newcolumn = newLoc[1]
+    if self.state[newrow][newcolumn][1] == '.':
+      return False
+    elif(self.state[newrow][newcolumn][1] == opponent):
+      return True
+    else:
+      return False
+
+  def conquer(self, newrow, newcolumn, _input, curPlayer):
+    """ This is called only within raidLocation function.
+        This function checks if the adjacent positions of
+        (newrow,newcolumn) belongs to oponent. If it does,
+        this function replaces the oponent symbol with the 
+        self.Nodeplayer i.e currplayers symbol (X/O).
+        Since, the game state is changed, gamescore calculator
+        function is called to update the gamescore. 
+    """
+    adjacentLocs = self.getAdjacentLocation(newrow, newcolumn)
+    for i in range(4): #up,down,left,right
+      if self.isValidLocation(adjacentLocs[i]):
+        #Since conquer is called on newNode, the self will have opponent symbol
+        opponentSymbol = self.Nodeplayer
+        if self.isOccupiedByOpponent(adjacentLocs[i], opponentSymbol):
+          #We conquer here
+          row = adjacentLocs[i][0]
+          column = adjacentLocs[i][1]
+          self.state[row][column][1] = copy.copy(curPlayer) 
+          #Since the game changes on raid, we recalculate the gamescore
+          if self.depth == _input.depth : #TODO: Is this if check needed?
+            self.CalculateGameScore()
+
+  def raidLocation(self, newLoc, _input):
+    """ Raids the location newLoc and also conquers the neighbours, if any.
+        Note that each of this raidLocation creates a new child and appends
+        to the raid_children_list.
+        Note: _input is needed to get the depth of tree """
+    newrow = newLoc[0]
+    newcolumn = newLoc[1]
+    newNode = self.makeNode(newrow, newcolumn, _input)
+    newNode.conquer(newrow, newcolumn, _input, self.Nodeplayer)
+    self.raid_children_list.append(newNode)
+    
+  def BuildRaidChildrenList(self, _input):
+    for row in range(self.n):
+      for column in range(self.n):
+        if self.state[row][column][1] == self.Nodeplayer:
+          adjLocs = self.getAdjacentLocation(row,column)
+          for i in range(4): #up,down,left,right
+            if (self.isValidLocation(adjLocs[i])) :
+              if (self.isLocationEmpty(adjLocs[i])):
+                self.raidLocation(adjLocs[i], _input)
+              
+          
   def DisplayNode(self):
     print 'Nodeplayer:%s;gamescore:%d'%(self.Nodeplayer,self.gamescore)
     for row in range(self.n):
@@ -116,6 +228,7 @@ class _Input(object):
         if statevalue not in YOUPLAYS:
           if statevalue is not '.':
             Debug_print('Error in state')
+            exit()
         local_row.append(statevalue)
       self.boardstate.append(local_row)
 
@@ -155,7 +268,11 @@ def BuildRootNode(_input, rootNode):
 
 def DisplayChildren(nodeToDisplay):
   """ Debug func to display the children """
+  print'Stake children'
   for node in nodeToDisplay.stake_children_list:
+    node.DisplayNode()
+  print'Raid children'
+  for node in nodeToDisplay.raid_children_list:
     node.DisplayNode()
 
 def ParseInputFile(_input):
@@ -203,6 +320,7 @@ def main():
   rootNode.CalculateGameScore()
   rootNode.DisplayNode()
   rootNode.BuildStakeChildrenList(_input)
+  rootNode.BuildRaidChildrenList(_input)
   DisplayChildren(rootNode)
 
 if __name__ == '__main__':
