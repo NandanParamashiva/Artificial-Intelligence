@@ -180,13 +180,31 @@ class _Node(object):
     else:
       return False
 
+  def isSurrondedByOpponent(self, row, column):
+    """ Returns True of surrronded by opponent """
+    if self.Nodeplayer in ('X','x'):
+      opponent = 'O'
+    elif self.Nodeplayer in ('O','o'):
+      opponent = 'X'
+    else:
+      print 'Shouldnot be here'
+      exit()
+    adjLocs = self.getAdjacentLocation(row,column)
+    for i in range(4): #up,down,left,right
+      if (self.isValidLocation(adjLocs[i])) :
+        if (self.isLocationOccupiedByPlayerSymbol(adjLocs[i], opponent)):
+          return True
+    return False
+
   def isRaidPossible(self, currow, curcolumn):
+    surrondedByOpponent = self.isSurrondedByOpponent(currow, curcolumn)
     adjLocs = self.getAdjacentLocation(currow,curcolumn)
     for i in range(4): #up,down,left,right
       if (self.isValidLocation(adjLocs[i])) :
         if (self.isLocationOccupiedByPlayerSymbol(adjLocs[i], self.Nodeplayer)):
-           #TODO: To optimize, return true only if there is also an opponent surronding this currow,curcolumn
-           return True
+           #TODO: Is it ok to have this check?
+           if (surrondedByOpponent): # return true only if there is also an opponent surronding this currow,curcolumn
+             return True
     #couldnot find my own player in neighbour hence cannot raid this location
     return False
 
