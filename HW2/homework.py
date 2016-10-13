@@ -36,13 +36,13 @@ class _Node(object):
     self.stake_children_list = []
     self.raid_children_list = []
 
-  def CalculateGameScore(self):
+  def CalculateGameScore(self, _input):
     """ calculates the game score for self.player """
     NodeplayerScore = 0
     oponentScore = 0
     for row in range(self.n):
       for column in range(self.n):
-        if self.state[row][column][1] == self.Nodeplayer:
+        if self.state[row][column][1] == _input.youplay:
           NodeplayerScore = NodeplayerScore + self.state[row][column][0]
         elif self.state[row][column][1] != '.':
           oponentScore = oponentScore + self.state[row][column][0]
@@ -71,7 +71,7 @@ class _Node(object):
       else:
         print 'Something went wrong in Boardstate'
       if newNode.depth == _input.depth :
-        newNode.CalculateGameScore()
+        newNode.CalculateGameScore(_input)
       return newNode
 
   def BuildStakeChildrenList(self, _input):
@@ -93,7 +93,7 @@ class _Node(object):
           else:
             print 'Something went wrong in Boardstate'
           if newNode.depth == _input.depth : 
-            newNode.CalculateGameScore()
+            newNode.CalculateGameScore(_input)
           """
           newNode = self.makeNode(row, column, _input)
           self.stake_children_list.append(newNode) 
@@ -160,7 +160,7 @@ class _Node(object):
           self.state[row][column][1] = copy.copy(curPlayer) 
           #Since the game changes on raid, we recalculate the gamescore
           if self.depth == _input.depth : #TODO: Is this if check needed?
-            self.CalculateGameScore()
+            self.CalculateGameScore(_input)
 
   def raidLocation(self, newrow, newcolumn, _input):
     """ Raids the location newLoc and also conquers the neighbours, if any.
@@ -350,17 +350,93 @@ def ParseInputFile(_input):
   _input.BuildBoardState(lines)
 
 
+def minimax(rootNode, _input):
+  """ Implements the minimax algo """
+  '''result = MaxValue(rootNode, _input)
+  print 'gamescore is:', result[0]
+  print 'nextstate:'
+  result[1].DisplayNode()'''
+  rootNode.BuildStakeChildrenList(_input)
+  rootNode.BuildRaidChildrenList(_input)
+  DisplayChildren(rootNode)
+  v = MIN_GAMESCORE
+  resultNode = None
+  for i in range(len(rootNode.stake_children_list)):
+    temp = max(v, MinValue(rootNode.stake_children_list[i], _input))
+    if temp > v:
+      v = temp
+      resultNode = rootNode.stake_children_list[i]
+  for i in range(len(rootNode.raid_children_list)):
+    temp = max(v, MinValue(rootNode.raid_children_list[i], _input))
+    if temp > v:
+      v = temp
+      resultNode = rootNode.raid_children_list[i]
+  return resultNode
+
+
+def MinValue(node, _input):
+  if (node.depth == _input.depth):
+    node.CalculateGameScore(_input)
+    return node.gamescore
+  node.BuildStakeChildrenList(_input)
+  node.BuildRaidChildrenList(_input)
+  v = MAX_GAMESCORE
+  for i in range(len(node.stake_children_list)):
+    v = min(v, MaxValue(node.stake_children_list[i], _input))
+  for i in range(len(node.raid_children_list)):
+    v = min(v, MaxValue(node.raid_children_list[i], _input))
+  return v
+
+
+def MaxValue(node, _input):
+  if (node.depth == _input.depth):
+    node.CalculateGameScore(_input)
+    return node.gamescore
+  node.BuildStakeChildrenList(_input)
+  node.BuildRaidChildrenList(_input)
+  v = MIN_GAMESCORE
+  for i in range(len(node.stake_children_list)):
+    v = max(v, MinValue(node.stake_children_list[i], _input))
+  for i in range(len(node.raid_children_list)):
+    v = max(v, MinValue(node.raid_children_list[i], _input))
+  return v
+
+ 
+"""
+def testmain():
+  _input = _Input()
+  ParseInputFile(_input)
+  _input.Display_Input()
+  rootNode = _Node()
+  BuildRootNode(_input, rootNode)
+  rootNode.CalculateGameScore(_input)
+  rootNode.DisplayNode()
+  rootNode.BuildStakeChildrenList(_input)
+  rootNode.BuildRaidChildrenList(_input)
+  DisplayChildren(rootNode)
+"""
+
 def main():
   _input = _Input()
   ParseInputFile(_input)
   _input.Display_Input()
   rootNode = _Node()
   BuildRootNode(_input, rootNode)
-  rootNode.CalculateGameScore()
-  rootNode.DisplayNode()
-  rootNode.BuildStakeChildrenList(_input)
-  rootNode.BuildRaidChildrenList(_input)
-  DisplayChildren(rootNode)
+  #rootNode.CalculateGameScore(_input)
+  #rootNode.DisplayNode()
+  if _input.mode == 'MINIMAX':
+    resultNode = minimax(rootNode, _input)
+    print '-------Result------'
+    resultNode.DisplayNode()
+    print '-------------------'
+  elif _input.mode == 'ALPHABETA':
+    resultNode = alphabeta(rootNode, _input)
+    resultNode.DisplayNode()
+  else:
+    print 'competetion mode is not yet supported'
+  
 
 if __name__ == '__main__':
+  #testmain()
   main()
+
