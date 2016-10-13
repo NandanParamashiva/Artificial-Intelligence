@@ -1,5 +1,8 @@
 #!/usr/bin/env python
+
 import sys
+import copy
+
 
 MODES = ('MINIMAX', 'ALPHABETA', 'COMPETITION')
 YOUPLAYS = ('X', 'O', 'x', 'o')
@@ -18,18 +21,57 @@ class _Node(object):
   """ Stores the state information """
   def __init__(self):
     self.n = 0
+    self.depth = 0
+    self.Nodeplayer = None
     self.state = []
     self.gamescore = 0
     self.stake_children_list = []
     self.raid_children_list = []
 
+  def CalculateGameScore(self):
+    """ calculates the game score for self.player """
+    NodeplayerScore = 0
+    oponentScore = 0
+    for row in range(self.n):
+      for column in range(self.n):
+        if self.state[row][column][1] == self.Nodeplayer:
+          NodeplayerScore = NodeplayerScore + self.state[row][column][0]
+        elif self.state[row][column][1] != '.':
+          oponentScore = oponentScore + self.state[row][column][0]
+    self.gamescore = NodeplayerScore - oponentScore
+
+  def BuildStakeChildrenList(self, _input):
+    for row in range(self.n):
+      for column in range(self.n):
+        if self.state[row][column][1] == '.':
+          # Here we realize that there exists a child
+          newNode = _Node()
+          newNode.n = self.n
+          newNode.depth = self.depth+1
+          newNode.state = copy.deepcopy(self.state)
+          if self.Nodeplayer in ('X','x'):
+            newNode.state[row][column][1] = 'X'
+            newNode.Nodeplayer = 'O'
+          elif self.Nodeplayer in ('O','o'):
+            newNode.state[row][column][1] = 'O'
+            newNode.Nodeplayer = 'X'
+          else:
+            print 'Something went wrong in Boardstate'
+          if newNode.depth == _input.depth : 
+            newNode.CalculateGameScore()
+          self.stake_children_list.append(newNode) 
+
+  def BuildRaidChildrenList(self):
+     """ TODO """
+
   def DisplayNode(self):
-    print 'gamescore:%d'%self.gamescore
+    print 'Nodeplayer:%s;gamescore:%d'%(self.Nodeplayer,self.gamescore)
     for row in range(self.n):
       for column in range(self.n):
         #sys.stdout.write('%s'%self.state[row][column])
         print self.state[row][column],
       print
+
 
 class _Input(object):
   """ Stores the input.txt """
@@ -101,13 +143,20 @@ class _Input(object):
 def BuildRootNode(_input, rootNode):
   """ Builds the root node """
   rootNode.n = _input.n
+  rootNode.depth = 0
+  rootNode.Nodeplayer = _input.youplay
   for row in range(_input.n):
     local_list = []
     for column in range(_input.n):
-      local_tuple = (_input.cellvalues[row][column], _input.boardstate[row][column])
-      local_list.append(local_tuple)
+      local_tuplelike = [_input.cellvalues[row][column], _input.boardstate[row][column]]
+      local_list.append(local_tuplelike)
     rootNode.state.append(local_list)
 
+
+def DisplayChildren(nodeToDisplay):
+  """ Debug func to display the children """
+  for node in nodeToDisplay.stake_children_list:
+    node.DisplayNode()
 
 def ParseInputFile(_input):
   """ Parses the input file """
@@ -151,8 +200,10 @@ def main():
   _input.Display_Input()
   rootNode = _Node()
   BuildRootNode(_input, rootNode)
+  rootNode.CalculateGameScore()
   rootNode.DisplayNode()
-
+  rootNode.BuildStakeChildrenList(_input)
+  DisplayChildren(rootNode)
 
 if __name__ == '__main__':
   main()
