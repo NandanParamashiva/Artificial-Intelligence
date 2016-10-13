@@ -35,6 +35,26 @@ class _Node(object):
     self.gamescore = 0
     self.stake_children_list = []
     self.raid_children_list = []
+    self.stakeORraid = None
+    self.stakeORraidLocation = None
+
+  def DisplayBoardState(self):
+    """ Displays board state only, according to the HW specification """
+    for row in range(self.n):
+      for column in range(self.n):
+        print '%s'%self.state[row][column][1],
+      print
+
+  def OutputBoardState(self, fd_output):
+    """ writes board state only to output.txt, according to the HW specification """
+    for row in range(self.n):
+      for column in range(self.n):
+        fd_output.write('%s'%self.state[row][column][1])
+      fd_output.write('\n')
+
+  def OutputMove(self, fd_output):
+    """ writes the move only, according to HW spec """
+    fd_output.write('%s %s\n'%(self.stakeORraidLocation, self.stakeORraid))
 
   def CalculateGameScore(self, _input):
     """ calculates the game score for self.player """
@@ -48,7 +68,7 @@ class _Node(object):
           oponentScore = oponentScore + self.state[row][column][0]
     self.gamescore = NodeplayerScore - oponentScore
 
-  def makeNode(self, newrow, newcolumn, _input):
+  def makeNode(self, newrow, newcolumn, _input, stakeORraid):
       """ returns a newNode.
       input:  - newrow/newcolumn:Position where the current player i.e
                 the Nodeplayer wants to move(raid)/create(stake). Hence,
@@ -59,6 +79,8 @@ class _Node(object):
               - gamescore is populated only if its the leaf children.
               - Rest of the elements of _Node() are populated """
       newNode = _Node()
+      newNode.stakeORraidLocation = '%s%d'%((chr(ord('A')+newcolumn)), (newrow+1))
+      newNode.stakeORraid = stakeORraid
       newNode.n = self.n
       newNode.depth = self.depth+1
       newNode.state = copy.deepcopy(self.state)
@@ -95,7 +117,7 @@ class _Node(object):
           if newNode.depth == _input.depth : 
             newNode.CalculateGameScore(_input)
           """
-          newNode = self.makeNode(row, column, _input)
+          newNode = self.makeNode(row, column, _input, 'Stake')
           self.stake_children_list.append(newNode) 
 
   def isLocationEmpty(self, newLoc):
@@ -167,7 +189,7 @@ class _Node(object):
         Note that each of this raidLocation creates a new child and appends
         to the raid_children_list.
         Note: _input is needed to get the depth of tree """
-    newNode = self.makeNode(newrow, newcolumn, _input)
+    newNode = self.makeNode(newrow, newcolumn, _input, 'Raid')
     newNode.conquer(newrow, newcolumn, _input, self.Nodeplayer)
     self.raid_children_list.append(newNode)
 
@@ -358,7 +380,7 @@ def minimax(rootNode, _input):
   result[1].DisplayNode()'''
   rootNode.BuildStakeChildrenList(_input)
   rootNode.BuildRaidChildrenList(_input)
-  DisplayChildren(rootNode)
+  #DisplayChildren(rootNode)
   v = MIN_GAMESCORE
   resultNode = None
   for i in range(len(rootNode.stake_children_list)):
@@ -416,6 +438,17 @@ def testmain():
   DisplayChildren(rootNode)
 """
 
+def DisplayResult(node):
+  """ Displays the final answer """
+  print node.stakeORraidLocation, node.stakeORraid
+
+
+def Output_txt(resultNode,fd_output):
+   """ Writes the output.txt """
+   resultNode.OutputMove(fd_output)
+   resultNode.OutputBoardState(fd_output)
+
+
 def main():
   _input = _Input()
   ParseInputFile(_input)
@@ -424,16 +457,21 @@ def main():
   BuildRootNode(_input, rootNode)
   #rootNode.CalculateGameScore(_input)
   #rootNode.DisplayNode()
+  fd_output = open('output.txt', 'w')
   if _input.mode == 'MINIMAX':
     resultNode = minimax(rootNode, _input)
-    print '-------Result------'
-    resultNode.DisplayNode()
-    print '-------------------'
+    #print '-------Result------'
+    #DisplayResult(resultNode)
+    #resultNode.DisplayNode()
+    #resultNode.DisplayBoardState()
+    Output_txt(resultNode,fd_output)
+    #print '-------------------'
   elif _input.mode == 'ALPHABETA':
     resultNode = alphabeta(rootNode, _input)
-    resultNode.DisplayNode()
+    Output_txt(resultNode,fd_output)
   else:
     print 'competetion mode is not yet supported'
+  fd_output.close()
   
 
 if __name__ == '__main__':
