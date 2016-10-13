@@ -3,6 +3,14 @@
 import sys
 import copy
 
+"""
+TODO:
+1.
+If your raid is not conquering then no need to raid. i.e no need to consider that state.
+Because, that state will anyway be covered in stake.
+Remember, stake has higher priority over raid.
+
+"""
 
 MODES = ('MINIMAX', 'ALPHABETA', 'COMPETITION')
 YOUPLAYS = ('X', 'O', 'x', 'o')
@@ -154,27 +162,40 @@ class _Node(object):
           if self.depth == _input.depth : #TODO: Is this if check needed?
             self.CalculateGameScore()
 
-  def raidLocation(self, newLoc, _input):
+  def raidLocation(self, newrow, newcolumn, _input):
     """ Raids the location newLoc and also conquers the neighbours, if any.
         Note that each of this raidLocation creates a new child and appends
         to the raid_children_list.
         Note: _input is needed to get the depth of tree """
-    newrow = newLoc[0]
-    newcolumn = newLoc[1]
     newNode = self.makeNode(newrow, newcolumn, _input)
     newNode.conquer(newrow, newcolumn, _input, self.Nodeplayer)
     self.raid_children_list.append(newNode)
-    
+
+  def isLocationOccupiedByPlayerSymbol(self, Loc, playersymbol):
+    """ Returns True if PlayerSymbol has occupied the Loc """
+    row = Loc[0]
+    column = Loc[1]
+    if self.state[row][column][1] == playersymbol:
+      return True
+    else:
+      return False
+
+  def isRaidPossible(self, currow, curcolumn):
+    adjLocs = self.getAdjacentLocation(currow,curcolumn)
+    for i in range(4): #up,down,left,right
+      if (self.isValidLocation(adjLocs[i])) :
+        if (self.isLocationOccupiedByPlayerSymbol(adjLocs[i], self.Nodeplayer)):
+           #TODO: To optimize, return true only if there is also an opponent surronding this currow,curcolumn
+           return True
+    #couldnot find my own player in neighbour hence cannot raid this location
+    return False
+
   def BuildRaidChildrenList(self, _input):
     for row in range(self.n):
       for column in range(self.n):
-        if self.state[row][column][1] == self.Nodeplayer:
-          adjLocs = self.getAdjacentLocation(row,column)
-          for i in range(4): #up,down,left,right
-            if (self.isValidLocation(adjLocs[i])) :
-              if (self.isLocationEmpty(adjLocs[i])):
-                self.raidLocation(adjLocs[i], _input)
-              
+        if self.state[row][column][1] == '.':
+          if(self.isRaidPossible(row, column)):
+            self.raidLocation(row, column, _input)
           
   def DisplayNode(self):
     print 'Nodeplayer:%s;gamescore:%d'%(self.Nodeplayer,self.gamescore)
