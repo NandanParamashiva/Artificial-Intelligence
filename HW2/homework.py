@@ -2,6 +2,7 @@
 
 import sys
 import copy
+import time
 
 """
 TODO:
@@ -280,11 +281,11 @@ class _Input(object):
 
   def Display_Input(self):
     """ Displays the parsed values """
-    print'**************_InputParams**************'
-    print'%-15s'%'n',':','%d'%self.n
-    print'%-15s'%'mode',':','%s'%self.mode
-    print'%-15s'%'youplay',':','%s'%self.youplay
-    print'%-15s'%'depth',':','%d'%self.depth
+    print'----------_InputParams----------'
+    print'%-10s'%'n',':','%d'%self.n
+    print'%-10s'%'mode',':','%s'%self.mode
+    print'%-10s'%'youplay',':','%s'%self.youplay
+    print'%-10s'%'depth',':','%d'%self.depth
     for row in range(len(self.cellvalues)):
       for column in range(len(self.cellvalues[row])):
         #print self.cellvalues[row][column],None
@@ -293,9 +294,9 @@ class _Input(object):
     for row in range(len(self.boardstate)):
       for column in range(len(self.boardstate[row])):
         #print self.cellvalues[row][column],None
-        sys.stdout.write('%s '%self.boardstate[row][column])
+        sys.stdout.write('%s'%self.boardstate[row][column])
       print 
-    print'****************************************' 
+    print'--------------------------------' 
 
 
 def BuildRootNode(_input, rootNode):
@@ -515,5 +516,10 @@ def main():
   
 
 if __name__ == '__main__':
+  print '****************************************'
+  startTimer = time.time()
   main()
+  endTimer = time.time()
+  print("Time taken: %s seconds" % (endTimer - startTimer))
+  print '****************************************'
 
