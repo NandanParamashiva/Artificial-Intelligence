@@ -11,6 +11,18 @@ If your raid is not conquering then no need to raid. i.e no need to consider tha
 Because, that state will anyway be covered in stake.
 Remember, stake has higher priority over raid.
 
+2.
+Check the priority order:
+-Stake > Raid
+-Top Left to Right Bottom
+
+3.
+Only one square/unoccupied space is left, but your input file has
+depth as 2.
+(Need to handle such cases)
+
+4.
+
 """
 
 MODES = ('MINIMAX', 'ALPHABETA', 'COMPETITION')
