@@ -101,22 +101,6 @@ class _Node(object):
       for column in range(self.n):
         if self.state[row][column][1] == '.':
           # Here we realize that there exists a child
-          """
-          newNode = _Node()
-          newNode.n = self.n
-          newNode.depth = self.depth+1
-          newNode.state = copy.deepcopy(self.state)
-          if self.Nodeplayer in ('X','x'):
-            newNode.state[row][column][1] = 'X'
-            newNode.Nodeplayer = 'O'
-          elif self.Nodeplayer in ('O','o'):
-            newNode.state[row][column][1] = 'O'
-            newNode.Nodeplayer = 'X'
-          else:
-            print 'Something went wrong in Boardstate'
-          if newNode.depth == _input.depth : 
-            newNode.CalculateGameScore(_input)
-          """
           newNode = self.makeNode(row, column, _input, 'Stake')
           self.stake_children_list.append(newNode) 
 
@@ -374,10 +358,6 @@ def ParseInputFile(_input):
 
 def minimax(rootNode, _input):
   """ Implements the minimax algo """
-  '''result = MaxValue(rootNode, _input)
-  print 'gamescore is:', result[0]
-  print 'nextstate:'
-  result[1].DisplayNode()'''
   rootNode.BuildStakeChildrenList(_input)
   rootNode.BuildRaidChildrenList(_input)
   #DisplayChildren(rootNode)
@@ -497,20 +477,6 @@ def AlphaBeta(node, _input):
     alpha = max(alpha,v)
   return resultNode
 
- 
-"""
-def testmain():
-  _input = _Input()
-  ParseInputFile(_input)
-  _input.Display_Input()
-  rootNode = _Node()
-  BuildRootNode(_input, rootNode)
-  rootNode.CalculateGameScore(_input)
-  rootNode.DisplayNode()
-  rootNode.BuildStakeChildrenList(_input)
-  rootNode.BuildRaidChildrenList(_input)
-  DisplayChildren(rootNode)
-"""
 
 def DisplayResult(node):
   """ Displays the final answer """
@@ -549,6 +515,5 @@ def main():
   
 
 if __name__ == '__main__':
-  #testmain()
   main()
 
