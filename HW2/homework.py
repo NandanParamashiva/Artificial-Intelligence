@@ -423,6 +423,80 @@ def MaxValue(node, _input):
     v = max(v, MinValue(node.raid_children_list[i], _input))
   return v
 
+
+def MinValueAlphaBeta(node, _input, alpha, beta):
+  # For alphabeta pruning algo
+  if (node.depth == _input.depth):
+    node.CalculateGameScore(_input)
+    return node.gamescore
+  node.BuildStakeChildrenList(_input)
+  node.BuildRaidChildrenList(_input)
+  v = MAX_GAMESCORE
+  for i in range(len(node.stake_children_list)):
+    v = min(v, MaxValueAlphaBeta(node.stake_children_list[i], _input, alpha, beta))
+    if v <= alpha:
+      return v
+    beta = min(beta, v)
+  for i in range(len(node.raid_children_list)):
+    v = min(v, MaxValueAlphaBeta(node.raid_children_list[i], _input, alpha, beta))
+    if v <= alpha:
+      return v
+    beta = min(beta, v)
+  return v
+
+
+def MaxValueAlphaBeta(node, _input, alpha, beta):
+  # For alphabeta Pruning algo
+  if (node.depth == _input.depth):
+    node.CalculateGameScore(_input)
+    return node.gamescore
+  node.BuildStakeChildrenList(_input)
+  node.BuildRaidChildrenList(_input)
+  v = MIN_GAMESCORE
+  for i in range(len(node.stake_children_list)):
+    v = max(v, MinValueAlphaBeta(node.stake_children_list[i], _input, alpha, beta))
+    if v >= beta:
+      return v
+    alpha = max(alpha,v)
+  for i in range(len(node.raid_children_list)):
+    v = max(v, MinValueAlphaBeta(node.raid_children_list[i], _input, alpha, beta))
+    if v >= beta:
+      return v
+    alpha = max(alpha,v)
+  return v
+
+
+def AlphaBeta(node, _input):
+  """ Implements the AlphaBeta algorithm """
+  # Note, node is rootNode here
+  if (node.depth == _input.depth):
+    # ideally, it should not end here since input depth != 0
+    node.CalculateGameScore(_input)
+    return node
+  node.BuildStakeChildrenList(_input)
+  node.BuildRaidChildrenList(_input)
+  v = MIN_GAMESCORE
+  resultNode = None
+  alpha = MIN_GAMESCORE
+  beta = MAX_GAMESCORE
+  for i in range(len(node.stake_children_list)):
+    temp = max(v, MinValueAlphaBeta(node.stake_children_list[i], _input, alpha, beta))
+    if temp > v:
+      resultNode = node.stake_children_list[i]
+    v = temp
+    if v >= beta:
+      return resultNode
+    alpha = max(alpha,v)
+  for i in range(len(node.raid_children_list)):
+    temp = max(v, MinValueAlphaBeta(node.raid_children_list[i], _input, alpha, beta))
+    if temp > v:
+      resultNode = node.raid_children_list[i]
+    v = temp
+    if v >= beta:
+      return resultNode
+    alpha = max(alpha,v)
+  return resultNode
+
  
 """
 def testmain():
@@ -467,7 +541,7 @@ def main():
     Output_txt(resultNode,fd_output)
     #print '-------------------'
   elif _input.mode == 'ALPHABETA':
-    resultNode = alphabeta(rootNode, _input)
+    resultNode = AlphaBeta(rootNode, _input)
     Output_txt(resultNode,fd_output)
   else:
     print 'competetion mode is not yet supported'
