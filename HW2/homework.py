@@ -324,7 +324,7 @@ def ParseInputFile(_input):
   """ Parses the input file """
   fd_input = open('input.txt', 'rU')
   lines = fd_input.read().split('\n')
-  print(lines)
+  #print(lines)
   #print 'len:%d'%len(lines)
   try:
     n = int(lines[0])
