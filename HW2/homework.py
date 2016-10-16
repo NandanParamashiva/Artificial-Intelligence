@@ -371,6 +371,10 @@ def ParseInputFile(_input):
 
 def minimax(rootNode, _input):
   """ Implements the minimax algo """
+  if (rootNode.depth == _input.depth):
+    # ideally, it should not end here since input depth != 0
+    rootNode.CalculateGameScore(_input)
+    return rootNode
   rootNode.BuildStakeChildrenList(_input)
   rootNode.BuildRaidChildrenList(_input)
   #DisplayChildren(rootNode)
