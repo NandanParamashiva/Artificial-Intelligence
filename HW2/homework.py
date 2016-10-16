@@ -6,18 +6,17 @@ import time
 
 """
 TODO:
-1.
+1. DONE
 If your raid is not conquering then no need to raid. i.e no need to consider that state.
 Because, that state will anyway be covered in stake.
 Remember, stake has higher priority over raid.
-Ans: Done
 
-2.
+2. DONE
 Check the priority order:
 -Stake > Raid
 -Top Left to Right Bottom
 
-3.
+3. DONE
 Only one square/unoccupied space is left, but your input file has
 depth as 2.
 (Need to handle such cases)
