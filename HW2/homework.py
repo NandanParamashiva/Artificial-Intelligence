@@ -261,6 +261,7 @@ class _Input(object):
     #self.boardstate = [[] for i in range(self.n)] #list of lists
     self.cellvalues = []
     self.boardstate = []
+    self.initialEmptySpaces = 0
 
   def BuildCellValues(self, lines):
     for linenum in range(4, (4+self.n) ):
@@ -290,6 +291,8 @@ class _Input(object):
       local_row = []
       for column in range(self.n):
         statevalue = temp[column]
+        if statevalue == '.':
+          self.initialEmptySpaces = self.initialEmptySpaces + 1
         if statevalue not in YOUPLAYS:
           if statevalue is not '.':
             Debug_print('Error in state')
@@ -314,7 +317,8 @@ class _Input(object):
       for column in range(len(self.boardstate[row])):
         #print self.cellvalues[row][column],None
         sys.stdout.write('%s'%self.boardstate[row][column])
-      print 
+      print
+    print'%-10s'%'initialEmptySpaces',':','%d'%self.initialEmptySpaces
     print'--------------------------------' 
 
 
@@ -378,7 +382,8 @@ def ParseInputFile(_input):
 
 def minimax(rootNode, _input):
   """ Implements the minimax algo """
-  if (rootNode.depth >= _input.depth):
+  curEmptySpaces = (_input.initialEmptySpaces - rootNode.depth)
+  if ((rootNode.depth >= _input.depth) or (curEmptySpaces <= 0)):
     # ideally, it should not end here since input depth != 0
     rootNode.CalculateGameScore(_input)
     return rootNode
@@ -401,7 +406,8 @@ def minimax(rootNode, _input):
 
 
 def MinValue(node, _input):
-  if (node.depth >= _input.depth):
+  curEmptySpaces = (_input.initialEmptySpaces - node.depth)
+  if ((node.depth >= _input.depth) or (curEmptySpaces <= 0)):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -417,7 +423,8 @@ def MinValue(node, _input):
 
 
 def MaxValue(node, _input):
-  if (node.depth >= _input.depth):
+  curEmptySpaces = (_input.initialEmptySpaces - node.depth)
+  if ((node.depth >= _input.depth) or (curEmptySpaces <= 0)):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -434,7 +441,8 @@ def MaxValue(node, _input):
 
 def MinValueAlphaBeta(node, _input, alpha, beta):
   # For alphabeta pruning algo
-  if (node.depth >= _input.depth):
+  curEmptySpaces = (_input.initialEmptySpaces - node.depth)
+  if ((node.depth >= _input.depth) or (curEmptySpaces <= 0)):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -457,7 +465,8 @@ def MinValueAlphaBeta(node, _input, alpha, beta):
 
 def MaxValueAlphaBeta(node, _input, alpha, beta):
   # For alphabeta Pruning algo
-  if (node.depth >= _input.depth):
+  curEmptySpaces = (_input.initialEmptySpaces - node.depth)
+  if ((node.depth >= _input.depth) or (curEmptySpaces <= 0)):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -480,8 +489,9 @@ def MaxValueAlphaBeta(node, _input, alpha, beta):
 
 def AlphaBeta(node, _input):
   """ Implements the AlphaBeta algorithm """
+  curEmptySpaces = (_input.initialEmptySpaces - node.depth)
   # Note, node is rootNode here
-  if (node.depth >= _input.depth):
+  if ((node.depth >= _input.depth) or (curEmptySpaces <= 0)):
     # ideally, it should not end here since input depth != 0
     node.CalculateGameScore(_input)
     return node
