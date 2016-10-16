@@ -371,7 +371,7 @@ def ParseInputFile(_input):
 
 def minimax(rootNode, _input):
   """ Implements the minimax algo """
-  if (rootNode.depth == _input.depth):
+  if (rootNode.depth >= _input.depth):
     # ideally, it should not end here since input depth != 0
     rootNode.CalculateGameScore(_input)
     return rootNode
@@ -394,7 +394,7 @@ def minimax(rootNode, _input):
 
 
 def MinValue(node, _input):
-  if (node.depth == _input.depth):
+  if (node.depth >= _input.depth):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -408,7 +408,7 @@ def MinValue(node, _input):
 
 
 def MaxValue(node, _input):
-  if (node.depth == _input.depth):
+  if (node.depth >= _input.depth):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -423,7 +423,7 @@ def MaxValue(node, _input):
 
 def MinValueAlphaBeta(node, _input, alpha, beta):
   # For alphabeta pruning algo
-  if (node.depth == _input.depth):
+  if (node.depth >= _input.depth):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -444,7 +444,7 @@ def MinValueAlphaBeta(node, _input, alpha, beta):
 
 def MaxValueAlphaBeta(node, _input, alpha, beta):
   # For alphabeta Pruning algo
-  if (node.depth == _input.depth):
+  if (node.depth >= _input.depth):
     node.CalculateGameScore(_input)
     return node.gamescore
   node.BuildStakeChildrenList(_input)
@@ -466,7 +466,7 @@ def MaxValueAlphaBeta(node, _input, alpha, beta):
 def AlphaBeta(node, _input):
   """ Implements the AlphaBeta algorithm """
   # Note, node is rootNode here
-  if (node.depth == _input.depth):
+  if (node.depth >= _input.depth):
     # ideally, it should not end here since input depth != 0
     node.CalculateGameScore(_input)
     return node
