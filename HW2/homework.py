@@ -10,6 +10,7 @@ TODO:
 If your raid is not conquering then no need to raid. i.e no need to consider that state.
 Because, that state will anyway be covered in stake.
 Remember, stake has higher priority over raid.
+Ans: Done
 
 2.
 Check the priority order:
@@ -46,8 +47,8 @@ class _Node(object):
     self.Nodeplayer = None
     self.state = []
     self.gamescore = 0
-    self.stake_children_list = []
-    self.raid_children_list = []
+    self.stake_children_list = [] #insert front. And remove from end. FIFO
+    self.raid_children_list = [] #insert front. And remove from end. FIFO
     self.stakeORraid = None
     self.stakeORraidLocation = None
 
@@ -145,7 +146,7 @@ class _Node(object):
     down = (row+1,column)
     left = (row,column-1)
     right = (row,column+1)
-    return (up,down,left,right)
+    return (up,left,right,down)
 
   def isOccupiedByOpponent(self, newLoc, opponent):
     """ Returns True if newLoc is occupied by opponent """
@@ -216,6 +217,12 @@ class _Node(object):
     return False
 
   def isRaidPossible(self, currow, curcolumn):
+    """ Returns True if given (currow, curcolumn) is raidable.
+        Raid without conquer(see TODO#1 at file begining) :
+        Note that, even if (currow,curcolumn) has a neighbour own player,
+        we do not return True right away, instead we see if the (currow,curcolumn)
+        also has an opponent in neighbour, only then (both the conditions are met)
+        we return True. This is because of Performance reason. """
     surrondedByOpponent = self.isSurrondedByOpponent(currow, curcolumn)
     adjLocs = self.getAdjacentLocation(currow,curcolumn)
     for i in range(4): #up,down,left,right
@@ -224,7 +231,7 @@ class _Node(object):
            #TODO: Is it ok to have this check?
            if (surrondedByOpponent): # return true only if there is also an opponent surronding this currow,curcolumn
              return True
-    #couldnot find my own player in neighbour hence cannot raid this location
+    #couldnot find my own player and opponent in neighbour hence cannot raid this location
     return False
 
   def BuildRaidChildrenList(self, _input):
