@@ -115,7 +115,7 @@ class _Node(object):
         if self.state[row][column][1] == '.':
           # Here we realize that there exists a child
           newNode = self.makeNode(row, column, _input, 'Stake')
-          self.stake_children_list.append(newNode) 
+          self.stake_children_list.insert(0, newNode) 
 
   def isLocationEmpty(self, newLoc):
     """ returns True if newLoc(tuple) is empty """
@@ -188,7 +188,7 @@ class _Node(object):
         Note: _input is needed to get the depth of tree """
     newNode = self.makeNode(newrow, newcolumn, _input, 'Raid')
     newNode.conquer(newrow, newcolumn, _input, self.Nodeplayer)
-    self.raid_children_list.append(newNode)
+    self.raid_children_list.insert(0, newNode)
 
   def isLocationOccupiedByPlayerSymbol(self, Loc, playersymbol):
     """ Returns True if PlayerSymbol has occupied the Loc """
@@ -380,12 +380,12 @@ def minimax(rootNode, _input):
   #DisplayChildren(rootNode)
   v = MIN_GAMESCORE
   resultNode = None
-  for i in range(len(rootNode.stake_children_list)):
+  for i in reversed(range(len(rootNode.stake_children_list))):
     temp = max(v, MinValue(rootNode.stake_children_list[i], _input))
     if temp > v:
       v = temp
       resultNode = rootNode.stake_children_list[i]
-  for i in range(len(rootNode.raid_children_list)):
+  for i in reversed(range(len(rootNode.raid_children_list))):
     temp = max(v, MinValue(rootNode.raid_children_list[i], _input))
     if temp > v:
       v = temp
@@ -400,10 +400,12 @@ def MinValue(node, _input):
   node.BuildStakeChildrenList(_input)
   node.BuildRaidChildrenList(_input)
   v = MAX_GAMESCORE
-  for i in range(len(node.stake_children_list)):
+  for i in reversed(range(len(node.stake_children_list))):
     v = min(v, MaxValue(node.stake_children_list[i], _input))
-  for i in range(len(node.raid_children_list)):
+    node.stake_children_list.pop(i)
+  for i in reversed(range(len(node.raid_children_list))):
     v = min(v, MaxValue(node.raid_children_list[i], _input))
+    node.raid_children_list.pop(i)
   return v
 
 
@@ -414,10 +416,12 @@ def MaxValue(node, _input):
   node.BuildStakeChildrenList(_input)
   node.BuildRaidChildrenList(_input)
   v = MIN_GAMESCORE
-  for i in range(len(node.stake_children_list)):
+  for i in reversed(range(len(node.stake_children_list))):
     v = max(v, MinValue(node.stake_children_list[i], _input))
-  for i in range(len(node.raid_children_list)):
+    node.stake_children_list.pop(i)
+  for i in reversed(range(len(node.raid_children_list))):
     v = max(v, MinValue(node.raid_children_list[i], _input))
+    node.raid_children_list.pop(i)
   return v
 
 
@@ -429,13 +433,15 @@ def MinValueAlphaBeta(node, _input, alpha, beta):
   node.BuildStakeChildrenList(_input)
   node.BuildRaidChildrenList(_input)
   v = MAX_GAMESCORE
-  for i in range(len(node.stake_children_list)):
+  for i in reversed(range(len(node.stake_children_list))):
     v = min(v, MaxValueAlphaBeta(node.stake_children_list[i], _input, alpha, beta))
+    node.stake_children_list.pop(i)
     if v <= alpha:
       return v
     beta = min(beta, v)
-  for i in range(len(node.raid_children_list)):
+  for i in reversed(range(len(node.raid_children_list))):
     v = min(v, MaxValueAlphaBeta(node.raid_children_list[i], _input, alpha, beta))
+    node.raid_children_list.pop(i)
     if v <= alpha:
       return v
     beta = min(beta, v)
@@ -450,13 +456,15 @@ def MaxValueAlphaBeta(node, _input, alpha, beta):
   node.BuildStakeChildrenList(_input)
   node.BuildRaidChildrenList(_input)
   v = MIN_GAMESCORE
-  for i in range(len(node.stake_children_list)):
+  for i in reversed(range(len(node.stake_children_list))):
     v = max(v, MinValueAlphaBeta(node.stake_children_list[i], _input, alpha, beta))
+    node.stake_children_list.pop(i)
     if v >= beta:
       return v
     alpha = max(alpha,v)
-  for i in range(len(node.raid_children_list)):
+  for i in reversed(range(len(node.raid_children_list))):
     v = max(v, MinValueAlphaBeta(node.raid_children_list[i], _input, alpha, beta))
+    node.raid_children_list.pop(i)
     if v >= beta:
       return v
     alpha = max(alpha,v)
@@ -476,7 +484,7 @@ def AlphaBeta(node, _input):
   resultNode = None
   alpha = MIN_GAMESCORE
   beta = MAX_GAMESCORE
-  for i in range(len(node.stake_children_list)):
+  for i in reversed(range(len(node.stake_children_list))):
     temp = max(v, MinValueAlphaBeta(node.stake_children_list[i], _input, alpha, beta))
     if temp > v:
       resultNode = node.stake_children_list[i]
@@ -484,7 +492,7 @@ def AlphaBeta(node, _input):
     if v >= beta:
       return resultNode
     alpha = max(alpha,v)
-  for i in range(len(node.raid_children_list)):
+  for i in reversed(range(len(node.raid_children_list))):
     temp = max(v, MinValueAlphaBeta(node.raid_children_list[i], _input, alpha, beta))
     if temp > v:
       resultNode = node.raid_children_list[i]
