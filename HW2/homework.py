@@ -533,7 +533,7 @@ def Output_txt(resultNode,fd_output):
 def main():
   _input = _Input()
   ParseInputFile(_input)
-  _input.Display_Input()
+  #_input.Display_Input()
   rootNode = _Node()
   BuildRootNode(_input, rootNode)
   #rootNode.CalculateGameScore(_input)
@@ -556,10 +556,10 @@ def main():
   
 
 if __name__ == '__main__':
-  print '****************************************'
-  startTimer = time.time()
+  #print '****************************************'
+  #startTimer = time.time()
   main()
-  endTimer = time.time()
-  print("Time taken: %s seconds" % (endTimer - startTimer))
-  print '****************************************'
+  #endTimer = time.time()
+  #print("Time taken: %s seconds" % (endTimer - startTimer))
+  #print '****************************************'
 
