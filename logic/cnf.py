@@ -135,6 +135,7 @@ def p_expression_predicate(p):
 # Syntax errors rule
 def p_error(p):
     print("ERROR:Syntax error in input!")
+    exit()
 
 import ply.yacc as yacc
 yacc.yacc()
