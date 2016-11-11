@@ -100,10 +100,14 @@ class ClauseObj(object):
 
 def p_expression_logic_op(p):
     '''expression : expression AND expression
-                  | expression OR expression
-                  | expression IMPLIES expression'''
+                  | expression OR expression'''
 
     p[0] = ClauseObj(p[2],p[1],p[3],None,False)
+
+#TODO: Test this
+def p_expression_implies(p):
+    'expression : expression IMPLIES expression'
+    p[0] = ClauseObj('OR',ClauseObj(None,None,None,p[1],True),p[3],None,False)
 
 def p_expression_not(p):
     'expression : NOT expression'
@@ -133,11 +137,5 @@ while 1:
     result = yacc.parse(s)
     from pprint import pprint
     pprint (vars(result))
-
-
-
-
-
-
 
 
