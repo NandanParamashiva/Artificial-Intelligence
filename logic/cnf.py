@@ -53,9 +53,11 @@ def t_error(t):
 # Build lexer
 lexer = lex.lex()
 
-# Give the lexer some input
-lexer.input(data)
+'''
+# This is to test the Tokenizing
+lexer.input(data) # Give the lexer some input
 
+#TODO: Code cleanup
 # Tokenize
 while True:
     tok = lexer.token()
@@ -69,3 +71,73 @@ while True:
     except:
       print(tok)
       pass
+'''
+
+###########################################
+#### YACC: Rules for Parsing are below ####
+###########################################
+
+# TODO: () precedence should be entered below?
+precedence = (
+    ('left','IMPLIES'),
+    ('left','OR'),
+    ('left','AND'),
+    ('left','NOT'),
+    )
+
+class ClauseObj(object):
+  def __init__(self,
+               operator         =None,
+               left_clause      =None,
+               right_clause     =None,
+               predicate_clause =None,
+               neg              =False):
+    self.operator = operator
+    self.left_clause = left_clause
+    self.right_clause = right_clause
+    self.predicate_clause = predicate_clause
+    self.neg = neg
+
+def p_expression_logic_op(p):
+    '''expression : expression AND expression
+                  | expression OR expression
+                  | expression IMPLIES expression'''
+
+    p[0] = ClauseObj(p[2],p[1],p[3],None,False)
+
+def p_expression_not(p):
+    'expression : NOT expression'
+    p[0] = ClauseObj(None,None,None,p[2],True)
+
+def p_expression_brackets(p):
+    'expression : LPAREN expression RPAREN'
+    p[0] = ClauseObj(None,None,None,p[2],False)
+
+def p_expression_predicate(p):
+    'expression : PREDICATE'
+    p[0] = ClauseObj(None,None,None,p[1],False)
+
+# Syntax errors rule
+def p_error(p):
+    print("ERROR:Syntax error in input!")
+
+import ply.yacc as yacc
+yacc.yacc()
+
+while 1:
+    try:
+        s = raw_input('logic > ')
+    except EOFError:
+        break
+    if not s: continue
+    result = yacc.parse(s)
+    from pprint import pprint
+    pprint (vars(result))
+
+
+
+
+
+
+
+
