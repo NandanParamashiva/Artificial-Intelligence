@@ -1,0 +1,10 @@
+3
+MINIMAX
+X
+2
+1 1 3
+1 1 1
+1 1 1
+OXX
+XOX
+XO.
