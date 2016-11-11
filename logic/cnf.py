@@ -107,15 +107,26 @@ def p_expression_logic_op(p):
 #TODO: Test this
 def p_expression_implies(p):
     'expression : expression IMPLIES expression'
-    p[0] = ClauseObj('OR',ClauseObj(None,None,None,p[1],True),p[3],None,False)
+    # A=>B is ~A|B
+    #p[0] = ClauseObj('OR',ClauseObj(None,None,None,p[1],True),p[3],None,False)
+    if p[1].neg == False:
+      p[1].neg = True
+    else:
+      p[1].neg = False
+    p[0] = ClauseObj('OR',p[1],p[3],None,False)
 
 def p_expression_not(p):
     'expression : NOT expression'
-    p[0] = ClauseObj(None,None,None,p[2],True)
+    #p[0] = ClauseObj(None,None,None,p[2],True)
+    if p[2].neg == False:
+      p[2].neg = True
+    else:
+      p[2].neg = False
+    p[0] = p[2]
 
 def p_expression_brackets(p):
     'expression : LPAREN expression RPAREN'
-    p[0] = ClauseObj(None,None,None,p[2],False)
+    p[0] = p[2]
 
 def p_expression_predicate(p):
     'expression : PREDICATE'
