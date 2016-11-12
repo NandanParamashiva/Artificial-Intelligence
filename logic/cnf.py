@@ -140,6 +140,30 @@ def p_error(p):
 import ply.yacc as yacc
 yacc.yacc()
 
+
+def BuildPredicateClauseString(root):
+    string = ""
+    if root.neg == True:
+      string += "~"
+    string += "%s("%root.predicate_clause.predicate
+    for i in range(len(root.predicate_clause.args)-1):
+      string += "%s,"%root.predicate_clause.args[i][0]
+    string += "%s)"%(root.predicate_clause.args[-1][0])
+    return string
+
+
+def BuildBinOpClauseString(root):
+    string = ""
+    if root.neg == True:
+      string += "~"
+    string += "(%s%s%s)"%(
+                        TreeTraversal(root.left_clause),
+                        root.operator,
+                        TreeTraversal(root.right_clause)
+                       )
+    return string
+
+
 def TreeTraversal(root):
   if root==None:
     return None
@@ -148,30 +172,20 @@ def TreeTraversal(root):
       (root.right_clause == None)):
     ''' Then we assume This ClauseObj is PredicateObj'''
     if root.predicate_clause != None:
-      string = "(%s%s(%s,))"%(
-                              "~" if root.neg == True else "",
-                              root.predicate_clause.predicate,
-                              list(arg for arg in root.predicate_clause.args)
-                              )
-      return string
+      return BuildPredicateClauseString(root)
     else:
       print'ERROR:ClauseObj should have either operator or PredicateObj'
       exit()
   elif(root.operator != None):
-    # If here, it means root is a ClauseObj with binary operator
-    string = "(%s(%s%s%s))"%(
-                           "~" if root.neg == True else "",
-                           TreeTraversal(root.left_clause),
-                           root.operator,
-                           TreeTraversal(root.right_clause)
-                           ) 
-    return string 
+    # If here, it means root is a ClauseObj with Binary operator
+    return BuildBinOpClauseString(root) 
   else:
     print'ERROR:Something went wrong'
     exit()
 
 
-while 1:
+def main():
+  while 1:
     try:
         s = raw_input('logic > ')
     except EOFError:
@@ -180,5 +194,13 @@ while 1:
     result = yacc.parse(s)
     #from pprint import pprint
     #pprint (vars(result))
-    print(TreeTraversal(result))
-    ###Trying to print the tree:
+    finaloutput = TreeTraversal(result)
+    for char in finaloutput:
+      if char == '[' or char == ']':
+        finaloutput = finaloutput.replace(char,'')
+    print finaloutput
+
+
+if __name__ == '__main__':
+  main()
+
