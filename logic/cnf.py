@@ -157,14 +157,14 @@ def BuildBinOpClauseString(root):
     if root.neg == True:
       string += "~"
     string += "(%s%s%s)"%(
-                        TreeTraversal(root.left_clause),
+                        PrintTreeTraversal(root.left_clause),
                         root.operator,
-                        TreeTraversal(root.right_clause)
+                        PrintTreeTraversal(root.right_clause)
                        )
     return string
 
 
-def TreeTraversal(root):
+def PrintTreeTraversal(root):
   if root==None:
     return None
   elif((root.operator    == None) or 
@@ -184,6 +184,73 @@ def TreeTraversal(root):
     exit()
 
 
+def DisplayTree(result):
+    finaloutput = PrintTreeTraversal(result)
+    for char in finaloutput:
+      if char == '[' or char == ']':
+        finaloutput = finaloutput.replace(char,'')
+    print finaloutput
+
+def NegateTrueFalse(x):
+  if x == True:
+    x = False
+  elif x == False:
+    x = True
+  else:
+    print 'ERROR: Neither True nor False'
+    exit()
+  return x
+
+def FlipAndOrOperator(x):
+  if x == '&':
+    x = '|'
+  elif x == '|':
+    x = '&'
+  else:
+    print 'ERROR: BinOp should be either & or | in Tree'
+    exit()
+  return x
+
+def MoveNegDownTheTree(root):
+  if root == None:
+    return
+  elif root.operator == None:
+    #Means we are the predicate clause so just return
+    return
+  else:
+    #If we are here, it should be a Binary op object
+    if root.operator == None:
+      print 'ERROR: Something went wrong'
+      exit()
+    if root.neg == True:
+      root.neg = False
+      root.operator = FlipAndOrOperator(root.operator)
+      root.left_clause.neg = NegateTrueFalse(root.left_clause.neg)
+      root.right_clause.neg = NegateTrueFalse(root.right_clause.neg)
+      '''
+      if root.operator == '&':
+        root.operator = '|'
+      elif root.operator == '|':
+        root.operator = '&'
+      else:
+        print 'ERROR: We shouldnot be here'
+        exit()
+      if (root.left_clause.neg == True):
+        root.left_clause.neg = False
+      elif(root.left_clause.neg == False):
+        root.left_clause.neg = True
+      else:
+        print 'ERROR: We shouldnot be here'
+      if (root.right_clause.neg == True):
+        root.right_clause.neg = False
+      elif(root.right_clause.neg == False):
+        root.right_clause.neg = True
+      else:
+        print 'ERROR: We shouldnot be here'
+      '''
+    MoveNegDownTheTree(root.left_clause)
+    MoveNegDownTheTree(root.right_clause)
+
 def main():
   while 1:
     try:
@@ -194,11 +261,8 @@ def main():
     result = yacc.parse(s)
     #from pprint import pprint
     #pprint (vars(result))
-    finaloutput = TreeTraversal(result)
-    for char in finaloutput:
-      if char == '[' or char == ']':
-        finaloutput = finaloutput.replace(char,'')
-    print finaloutput
+    MoveNegDownTheTree(result)
+    DisplayTree(result)
 
 
 if __name__ == '__main__':
