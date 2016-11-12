@@ -227,27 +227,6 @@ def MoveNegDownTheTree(root):
       root.operator = FlipAndOrOperator(root.operator)
       root.left_clause.neg = NegateTrueFalse(root.left_clause.neg)
       root.right_clause.neg = NegateTrueFalse(root.right_clause.neg)
-      '''
-      if root.operator == '&':
-        root.operator = '|'
-      elif root.operator == '|':
-        root.operator = '&'
-      else:
-        print 'ERROR: We shouldnot be here'
-        exit()
-      if (root.left_clause.neg == True):
-        root.left_clause.neg = False
-      elif(root.left_clause.neg == False):
-        root.left_clause.neg = True
-      else:
-        print 'ERROR: We shouldnot be here'
-      if (root.right_clause.neg == True):
-        root.right_clause.neg = False
-      elif(root.right_clause.neg == False):
-        root.right_clause.neg = True
-      else:
-        print 'ERROR: We shouldnot be here'
-      '''
     MoveNegDownTheTree(root.left_clause)
     MoveNegDownTheTree(root.right_clause)
 
