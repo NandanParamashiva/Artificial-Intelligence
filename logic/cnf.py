@@ -113,7 +113,7 @@ def p_expression_implies(p):
       p[1].neg = True
     else:
       p[1].neg = False
-    p[0] = ClauseObj('OR',p[1],p[3],None,False)
+    p[0] = ClauseObj('|',p[1],p[3],None,False)
 
 def p_expression_not(p):
     'expression : NOT expression'
@@ -140,6 +140,37 @@ def p_error(p):
 import ply.yacc as yacc
 yacc.yacc()
 
+def TreeTraversal(root):
+  if root==None:
+    return None
+  elif((root.operator    == None) or 
+      (root.left_clause  == None) or 
+      (root.right_clause == None)):
+    ''' Then we assume This ClauseObj is PredicateObj'''
+    if root.predicate_clause != None:
+      string = "(%s%s(%s,))"%(
+                              "~" if root.neg == True else "",
+                              root.predicate_clause.predicate,
+                              list(arg for arg in root.predicate_clause.args)
+                              )
+      return string
+    else:
+      print'ERROR:ClauseObj should have either operator or PredicateObj'
+      exit()
+  elif(root.operator != None):
+    # If here, it means root is a ClauseObj with binary operator
+    string = "(%s(%s%s%s))"%(
+                           "~" if root.neg == True else "",
+                           TreeTraversal(root.left_clause),
+                           root.operator,
+                           TreeTraversal(root.right_clause)
+                           ) 
+    return string 
+  else:
+    print'ERROR:Something went wrong'
+    exit()
+
+
 while 1:
     try:
         s = raw_input('logic > ')
@@ -147,7 +178,7 @@ while 1:
         break
     if not s: continue
     result = yacc.parse(s)
-    from pprint import pprint
-    pprint (vars(result))
-
-
+    #from pprint import pprint
+    #pprint (vars(result))
+    print(TreeTraversal(result))
+    ###Trying to print the tree:
