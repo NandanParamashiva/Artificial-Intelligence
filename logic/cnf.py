@@ -192,7 +192,7 @@ def DisplayTree(result):
         finaloutput = finaloutput.replace(char,'')
     print finaloutput
 
-def DisplaySentences(result):
+def RoughDisplaySentences(result):
     finaloutput = PrintTreeTraversal(result)
     for char in finaloutput:
       if char == '[' or char == ']':
@@ -298,6 +298,29 @@ def ConvertToCNF(root):
     return
 
 
+def BuildSentences(root, sentences_list):
+  if root == None:
+    return
+  elif ((root.operator == None) and 
+        (root.predicate_clause != None)
+       ):
+    sentences_list.append(root)
+    return
+  else:
+    # If here, means, root is binary op
+    if root.operator == '|':
+      # Below this root, we should not see a '&' 
+      # (since we have distributed it down the tree)
+      sentences_list.append(root)
+      return
+    elif root.operator == '&':
+      BuildSentences(root.left_clause,sentences_list)
+      BuildSentences(root.right_clause,sentences_list)
+    else:
+      print 'ERROR:Something went wrong'
+      exit()
+    
+
 def main():
   global SETTLED_DOWN
   while 1:
@@ -318,7 +341,12 @@ def main():
       ConvertToCNF(root)
     print'After Distributing | over &'
     DisplayTree(root)
-    DisplaySentences(root)
+    #RoughDisplaySentences(root)
+    sentences_list = []
+    BuildSentences(root,sentences_list)
+    print'Sentences:'
+    for i in range(len(sentences_list)):
+      DisplayTree(sentences_list[i])
 
 if __name__ == '__main__':
   main()
