@@ -319,34 +319,143 @@ def BuildSentences(root, sentences_list):
     else:
       print 'ERROR:Something went wrong'
       exit()
+
+class _Input(object):
+  """ Stores the input.txt """
+  def __init__(self):
+    self.total_queries = 0 #Number of queries
+    self.query_list = [] #Each element is a clause object pointing to Predicate
+    self.total_sent_lines = 0 #Input lines
+    self.sent_lines_list = [] #
+
+def BuildPredicateObj(line, pattern):
+      match = pattern.search(line)
+      if not match:
+        print'ERROR: Pattern didnot match'
+        return None
+      predicate = match.group(1).strip()
+      args = match.group(2)
+      splitlist = args.split(',')
+      argslist = []
+      for item in splitlist:
+        if (re.search(r'[A-Z]',item)):
+          # means item is constant
+          argslist.append((item.strip(),'CONSTANT'))
+        else:
+          argslist.append((item.strip(),'VARIABLE'))
+      predicate_object = PredicateObj(predicate,argslist,False)
+      return predicate_object
+
+def BuildQueryList(_input,lines):
+  #pattern = r'\s*([A-Z]\w*)\s*\(([^&\|=>\)]+)\)'
+  pattern = re.compile(r'\s*([A-Z]\w*)\s*\(([^&\|=>\)]+)\)')
+  #neg_pattern = r'\s*~\s*\(?([A-Z]\w*)\s*\(([^&\|=>\)]+)\)'
+  for linenum in range(1, _input.total_queries+1):
+    line = lines[linenum]
+    predicate_object = BuildPredicateObj(line,pattern)
+    if (predicate_object == None):
+      print 'ERROR: Error in query %s'%line
+      continue
+    if re.search(r'~',line):
+      clause_object = ClauseObj(None,None,None,predicate_object,True)
+    else:
+      clause_object = ClauseObj(None,None,None,predicate_object,False)
+    _input.query_list.append(clause_object) 
+    '''if neg_pattern.search(line):
+      match = neg_pattern.search(line)
+`      predicate = match.group(1).strip()
+      args = match.group(2)
+      splitlist = args.split(',')
+      argslist = []
+      for item in splitlist:
+        if (re.search(r'[A-Z]',item)):
+          # means item is constant
+          argslist.append((item.strip(),'CONSTANT'))
+        else:
+          argslist.append((item.strip(),'VARIABLE'))
+      predicate_object = PredicateObj(predicate,argslist,False)
+      clause_object = ClauseObj(None,None,None,predicate_object,True) 
+      _input.query_list.append(clause_object) 
+    elif(pattern.search(line)):'''
+
+def DisplayQueryList(_input):
+  for i in range(_input.total_queries):
+    print 'Given Query%d:'%i,
+    DisplayTree(_input.query_list[i]) 
     
+def BuildSentLineList(_input,lines):
+  for linenum in range(_input.total_queries+2, _input.total_queries+2+_input.total_sent_lines):
+    line = lines[linenum]
+    _input.sent_lines_list.append(line.strip())
+
+def DisplaySentLineList(_input):
+  for i in range(_input.total_sent_lines):
+    print 'Given Sentence%d:'%i , _input.sent_lines_list[i]
+
+def ParseInputFile(_input):
+  """ Parses the input file """
+  fd_input = open('input.txt', 'rU')
+  lines = fd_input.read().split('\n')
+  #print(lines)
+  #print 'len:%d'%len(lines)
+  try:
+    nq = int(lines[0])
+    _input.total_queries = nq
+  except ValueError:
+    print 'Error, Parsing nq in input.txt'
+    fd_input.close()
+    exit()
+  BuildQueryList(_input,lines)
+  try:
+    ns = int(lines[_input.total_queries+1])
+    _input.total_sent_lines = ns
+  except ValueError:
+    print 'Error, Parsing ns in input.txt'
+    fd_input.close()
+    exit()
+  BuildSentLineList(_input,lines)
+  
 
 def main():
   global SETTLED_DOWN
-  while 1:
+  _input = _Input()
+  ParseInputFile(_input)
+  DisplayQueryList(_input)
+  DisplaySentLineList(_input)
+  '''while 1:
     try:
         s = raw_input('logic > ')
     except EOFError:
         break
-    if not s: continue
-    root = yacc.parse(s)
-    #from pprint import pprint
-    #pprint (vars(result))
-    MoveNegDownTheTree(root)
-    print'Before Distributing | over &'
-    DisplayTree(root)
-    SETTLED_DOWN = False
-    while (SETTLED_DOWN == False):
-      SETTLED_DOWN = True
-      ConvertToCNF(root)
-    print'After Distributing | over &'
-    DisplayTree(root)
-    #RoughDisplaySentences(root)
-    sentences_list = []
-    BuildSentences(root,sentences_list)
-    print'Sentences:'
-    for i in range(len(sentences_list)):
-      DisplayTree(sentences_list[i])
+    if not s: continue'''
+  for i in range(_input.total_sent_lines):
+        print'\n\n*****************************'
+        print'Given Sentence%d: %s'%(i,_input.sent_lines_list[i])
+        root = yacc.parse(_input.sent_lines_list[i])
+        #from pprint import pprint
+        #pprint (vars(result))
+        MoveNegDownTheTree(root)
+        print'----------------------------'
+        print'Before Distributing | over &'
+        DisplayTree(root)
+        #print'----------------------------'
+        SETTLED_DOWN = False
+        while (SETTLED_DOWN == False):
+          SETTLED_DOWN = True
+          ConvertToCNF(root)
+        print'----------------------------'
+        print'After Distributing | over &'
+        DisplayTree(root)
+        #print'----------------------------'
+        #RoughDisplaySentences(root)
+        sentences_list = []
+        BuildSentences(root,sentences_list)
+        print'----------------------------'
+        print'Sentences:'
+        for i in range(len(sentences_list)):
+          DisplayTree(sentences_list[i])
+        print'*****************************'
+
 
 if __name__ == '__main__':
   main()
