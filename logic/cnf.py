@@ -3,6 +3,7 @@
 import sys
 import ply.lex as lex
 import re
+import copy
 
 data = '''(A(x,John) & ~B(Bob))=> C (x)'''
 
@@ -191,6 +192,17 @@ def DisplayTree(result):
         finaloutput = finaloutput.replace(char,'')
     print finaloutput
 
+def DisplaySentences(result):
+    finaloutput = PrintTreeTraversal(result)
+    for char in finaloutput:
+      if char == '[' or char == ']':
+        finaloutput = finaloutput.replace(char,'')
+    sentence_list = finaloutput.split('&')
+    print 'Sentences in KB:'
+    for i in range(len(sentence_list)):
+      print '%d:%s'%(i+1,sentence_list[i])
+
+
 def NegateTrueFalse(x):
   if x == True:
     x = False
@@ -230,19 +242,83 @@ def MoveNegDownTheTree(root):
     MoveNegDownTheTree(root.left_clause)
     MoveNegDownTheTree(root.right_clause)
 
+
+SETTLED_DOWN = False
+
+def LeftBranchAND(root):
+        # Case 1
+        global SETTLED_DOWN
+        root.operator = '&'
+        root.left_clause.operator = '|'
+        new_copy_branch = copy.deepcopy(root.right_clause)
+        temp = root.left_clause.right_clause
+        root.left_clause.right_clause = root.right_clause
+        new_node = ClauseObj('|',temp,new_copy_branch,None,False)
+        root.right_clause = new_node
+        SETTLED_DOWN = False
+        
+def RightBranchAND(root):
+        # Case 2
+        root.operator = '&'
+        root.right_clause.operator = '|'
+        new_copy_branch = copy.deepcopy(root.left_clause)
+        temp = root.right_clause.left_clause
+        root.right_clause.left_clause = root.left_clause
+        new_node = ClauseObj('|',new_copy_branch,temp,None,False)
+        root.left_clause = new_node
+        SETTLED_DOWN = False
+
+def ConvertToCNF(root):
+  global SETTLED_DOWN
+  ''' Converts the given tree to CNF form '''
+  if root == None:
+    return
+  elif ((root.operator == None) and 
+        (root.predicate_clause != None)
+       ):
+    return
+  else:
+    ''' If here, means the root obj is binary clause obj '''
+    if ((root.operator == None) or 
+        (root.predicate_clause != None)
+       ):
+        # Double check: We expect predicate clause to be None. 
+        print'ERROR: Something went wrong' 
+        exit()
+    if ((root.operator == '|') and 
+        (root.left_clause.operator == '&')
+        ): # Case 1
+        LeftBranchAND(root)
+    elif ((root.operator == '|') and
+          (root.right_clause.operator == '&')
+          ): # Case 2
+          RightBranchAND(root)
+    ConvertToCNF(root.left_clause)
+    ConvertToCNF(root.right_clause)
+    return
+
+
 def main():
+  global SETTLED_DOWN
   while 1:
     try:
         s = raw_input('logic > ')
     except EOFError:
         break
     if not s: continue
-    result = yacc.parse(s)
+    root = yacc.parse(s)
     #from pprint import pprint
     #pprint (vars(result))
-    MoveNegDownTheTree(result)
-    DisplayTree(result)
-
+    MoveNegDownTheTree(root)
+    print'Before Distributing | over &'
+    DisplayTree(root)
+    SETTLED_DOWN = False
+    while (SETTLED_DOWN == False):
+      SETTLED_DOWN = True
+      ConvertToCNF(root)
+    print'After Distributing | over &'
+    DisplayTree(root)
+    DisplaySentences(root)
 
 if __name__ == '__main__':
   main()
