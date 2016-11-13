@@ -387,8 +387,10 @@ def main():
   ParseInputFile(_input)
   DisplayQueryList(_input)
   DisplaySentLineList(_input)
+  KB_sentences_list = []
+  given_sentences_root = []
   for i in range(_input.total_sent_lines):
-        print'\n\n*****************************'
+        print'\n\n----------------------------'
         print'Given Sentence%d: %s'%(i,_input.sent_lines_list[i])
         root = yacc.parse(_input.sent_lines_list[i])
         #from pprint import pprint
@@ -407,13 +409,14 @@ def main():
         DisplayTree(root)
         #print'----------------------------'
         #RoughDisplaySentences(root)
-        sentences_list = []
-        BuildSentences(root,sentences_list)
-        print'----------------------------'
-        print'Sentences:'
-        for i in range(len(sentences_list)):
-          DisplayTree(sentences_list[i])
-        print'*****************************'
+        #KB_sentences_list = []
+        BuildSentences(root,KB_sentences_list)
+        given_sentences_root.append(root)
+  print'*****************************'
+  print'Sentences:'
+  for i in range(len(KB_sentences_list)):
+    DisplayTree(KB_sentences_list[i])
+  print'*****************************'
 
 
 if __name__ == '__main__':
