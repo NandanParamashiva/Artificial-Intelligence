@@ -4,6 +4,7 @@ import sys
 import ply.lex as lex
 import re
 import copy
+import pprint
 
 data = '''(A(x,John) & ~B(Bob))=> C (x)'''
 
@@ -380,6 +381,40 @@ def ParseInputFile(_input):
     exit()
   BuildSentLineList(_input,lines)
   
+given_sentences_root = []
+POSITIVE = 0
+NEGATIVE = 1
+
+def Initialize(predicate_hashmap, predicate):
+    predicate_hashmap[predicate] = [] 
+    for i in range(2): #[[positive_list],[negative_list]]
+        predicate_hashmap[predicate].append([])
+
+def FindNewPredicateAndUpdate(root, predicate_hashmap, KB_sentences_list_root):
+  if root == None:
+      return
+  elif (root.operator == None):
+      # Means, it's a predicate clause i.e at leaf
+      predicate = root.predicate_clause.predicate 
+      if (not(predicate in predicate_hashmap)):
+        Initialize(predicate_hashmap, predicate)
+      if (root.neg == True): #Means negative predicate
+          predicate_hashmap[predicate][NEGATIVE].append(KB_sentences_list_root)
+      else:
+          predicate_hashmap[predicate][POSITIVE].append(KB_sentences_list_root)
+      return
+  else:
+      #means, binary op
+      if (root.neg == True): #double checking if there is any negation
+          print'ERROR:negations should have been pushed down to leaf'
+          exit()
+      FindNewPredicateAndUpdate(root.left_clause, predicate_hashmap, KB_sentences_list_root)
+      FindNewPredicateAndUpdate(root.right_clause, predicate_hashmap, KB_sentences_list_root)
+      return
+    
+def BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list):
+  for i in range(len(KB_sentences_list)):
+    FindNewPredicateAndUpdate(KB_sentences_list[i], predicate_hashmap,KB_sentences_list[i])
 
 def main():
   global SETTLED_DOWN
@@ -388,7 +423,7 @@ def main():
   DisplayQueryList(_input)
   DisplaySentLineList(_input)
   KB_sentences_list = []
-  given_sentences_root = []
+  global given_sentences_root
   for i in range(_input.total_sent_lines):
         print'\n\n----------------------------'
         print'Given Sentence%d: %s'%(i,_input.sent_lines_list[i])
@@ -417,7 +452,9 @@ def main():
   for i in range(len(KB_sentences_list)):
     DisplayTree(KB_sentences_list[i])
   print'*****************************'
-
+  predicate_hashmap = {}
+  BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list)
+  pprint.pprint(predicate_hashmap)
 
 if __name__ == '__main__':
   main()
