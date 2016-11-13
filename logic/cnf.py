@@ -416,6 +416,220 @@ def BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list):
   for i in range(len(KB_sentences_list)):
     FindNewPredicateAndUpdate(KB_sentences_list[i], predicate_hashmap,KB_sentences_list[i])
 
+
+
+def CreateNegQuery(query_clause_obj):
+  predicate = copy.deepcopy(query_clause_obj.predicate_clause.predicate)
+  args = copy.deepcopy(query_clause_obj.predicate_clause.args)
+  new_predicate_obj = PredicateObj(predicate,args,False)
+  if (query_clause_obj.neg == True):
+    neg_clause_object = ClauseObj(None,None,None,new_predicate_obj,False)
+  else:
+    neg_clause_object = ClauseObj(None,None,None,new_predicate_obj,True)
+  return neg_clause_object
+
+def AddQueryToKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap):
+    # Adding to KB
+    KB_sentences_list.append(neg_query_clause_obj)
+    # Adding to hashmap
+    predicate = copy.deepcopy(neg_query_clause_obj.predicate_clause.predicate)
+    if (not(predicate in predicate_hashmap)):
+      Initialize(predicate_hashmap, predicate)
+    if (neg_query_clause_obj.neg == True): #Means negative predicate
+        predicate_hashmap[predicate][NEGATIVE].append(neg_query_clause_obj)
+    else:
+        predicate_hashmap[predicate][POSITIVE].append(neg_query_clause_obj)
+    return 
+
+
+def GetListFromTree(root, sentence_list):
+  if root == None:
+    return
+  if root.operator == None:# means, predicate clause
+    sentence_list.append(root)
+    return
+  GetListFromTree(root.left_clause, sentence_list)
+  GetListFromTree(root.right_clause, sentence_list)
+  return
+
+
+def CheckConflictConstants(pred_args, sent_args):
+  ''' Returns True if any conflicts '''
+  for i in range(len(pred_args)):
+    if ((pred_args[i][1] == sent_args[i][1]) and (pred_args[i][1] == 'CONSTANT')): # check if both are Constants
+      if (pred_args[i][0] != sent_args[i][0]):
+        #means, both are constants but of different const values
+        return True
+  return False
+
+def PredToUnify(predicate_clause_obj, sentence_list):
+  ''' Identifies the ~Predicate to unify and returns that, if not found, it will return None '''
+  for i in range(len(sentence_list)): #its a list of predicate clause obj
+    if(predicate_clause_obj.predicate_clause.predicate == sentence_list[i].predicate_clause.predicate):
+      if(predicate_clause_obj.neg != sentence_list[i].neg): # should be opposite to reduce/cancel out
+        pred_args = predicate_clause_obj.predicate_clause.args
+        sent_args = sentence_list[i].predicate_clause.args
+        if(len(pred_args) == len(sent_args)):
+          if (CheckConflictConstants(pred_args, sent_args) == False):
+            return sentence_list[i]
+  return None
+
+def ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence):
+  ''' populates the var/const binding in binding_node_list_predicates , binding_sentence '''
+  pred_args = predicate_clause_obj.predicate_clause.args
+  sent_args = pred_in_sent.predicate_clause.args
+  if(len(pred_args) != len(sent_args)):
+    print'ERROR: Both len should be same'
+    exit()
+  for i in range(len(pred_args)):
+    if (pred_args[i][1] != sent_args[i][1]):
+      if pred_args[i][1] == 'VARIABLE'
+        binding_node_list_predicates[pred_args[i][0]] = (sent_args[i][0],'CONSTANT')
+      else:
+        #means, sent_args[i][1] was a VARIABLE
+        binding_sentence[sent_args[i][1]] = (pred_args[i][0],'CONSTANT')
+    elif(pred_args[i][1] == 'VARIABLE'):# TODO: Dont know if we have to do this 
+        binding_node_list_predicates[pred_args[i][0]] = (sent_args[i][0],'VARIABLE')
+
+def BuildNewnodeListPredicates(node_list_predicates, 
+                               predicate_clause_obj, #predicate in node_list_predicates that needs to be skipped in newnode
+                               sentence, 
+                               pred_in_sent,# predicate in sentence that needs to be skipped in newnode
+                               binding_node_list_predicates, 
+                               binding_sentence)
+  ''' returns the new node, which is list of predicates clause obj after unification and resolution '''
+  newnode_list_predicates = []
+  for i in range(len(node_list_predicates)):
+    if node_list_predicates[i] == predicate_clause_obj:
+      continue
+    args = node_list_predicates[i].predicate_clause.args
+    new_args = []
+    for j in range(len(args)):
+      arg_tuple = args[j]
+      binding_tuple = binding_node_list_predicates[arg_tuple[0]]
+      if binding_tuple:
+        if binding_tuple[1] == 'CONSTANT':
+          print 'ERROR: can not replace constant'
+          exit()
+        new_args.append((binding_tuple[0],binding_tuple[1]))
+      else:
+        new_args.append(copy.deepcopy(args[j]))
+    p = PredicateObj(node_list_predicates[i].predicate_clause.predicate,new_args,False)
+    c = ClauseObj(None,None,None,p,node_list_predicates[i].neg)
+    newnode_list_predicates.append(c)
+    #Now do the same for sentence
+  for i in range(len(sentence)):
+    if sentence[i] == pred_in_sent:
+      continue
+    args = sentence[i].predicate_clause.args
+    new_args = []
+    for j in range(len(args)):
+      arg_tuple = args[j]
+      binding_tuple = binding_sentence[arg_tuple[0]]
+      if binding_tuple:
+        if binding_tuple[1] == 'CONSTANT':
+          print 'ERROR: can not replace constant'
+          exit()
+        new_args.append((binding_tuple[0],binding_tuple[1]))
+      else:
+        new_args.append(copy.deepcopy(args[j]))
+    p = PredicateObj(sentence[i].predicate_clause.predicate,new_args,False)
+    c = ClauseObj(None,None,None,p,sentence[i].neg)
+    newnode_list_predicates.append(c)
+  return newnode_list_predicates
+
+    '''
+    temp = copy.deepcopy(node_list_predicates[i])
+    args = temp.predicate_clause.args
+    for i in range(len(args)):
+      if binding_node_list_predicates[temp.predicate_clause.args[0]]:
+        if binding_node_list_predicates[temp.predicate_clause.args[0]][1] == 'CONSTANT':
+          print 'ERROR: can not replace constant'
+          exit()
+        temp.predicate_clause.args[0] = binding_node_list_predicates[temp.predicate_clause.args[0]][0]
+        temp.predicate_clause.args[1] = binding_node_list_predicates[temp.predicate_clause.args[0]][1]
+    newnode_list_predicates.append(temp)'''
+    
+    
+
+def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
+  ''' 1. Returns a list i.e newnode_list_predicates after unification/resolution 
+      2. The returning list will be tatutology simplified '''
+  sentence_list = []
+  GetListFromTree(sentence, sentence_list)
+  pred_in_sent = PredToUnify(predicate_clause_obj, sentence_list)
+  binding_node_list_predicates = {}
+  binding_sentence = {}
+  ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence)
+  newnode_list_predicates = BuildNewnodeListPredicates(node_list_predicates, 
+                                                       predicate_clause_obj, #predicate in node_list_predicates that needs to be skipped in newnode
+                                                       sentence, 
+                                                       pred_in_sent,# predicate in sentence that needs to be skipped in newnode
+                                                       binding_node_list_predicates, 
+                                                       binding_sentence)
+
+def CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap):
+    ''' Returns True if Contradiction is found '''
+
+CacheVisited = []
+
+def AlreadyVisited(newnode_list_predicates):
+  ''' If All the predicates in the input is visited before, 
+      as a node together, i.e same predicates with same args in a node, 
+      then we return True. Else we return False '''
+
+
+def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
+  for predicate_clause_obj in node_list_predicates:
+    if predicate_clause_obj.neg == True: # IMP: lookup in ~Predicate (i.e flip) 
+      list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][POSITIVE]
+    else:
+      list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][NEGATIVE]
+    for i in range(len(list_of_sentences)):
+      newnode_list_predicates = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
+      if newnode_list_predicates == None:
+        continue
+      if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
+        fd_output.write('TRUE\n')
+        return True
+      if ( AlreadyVisited(newnode_list_predicates) == True):
+        return False
+      if(FindContradiction(newnode_list_predicates,predicate_hashmap,fd_output) == True):
+        return True
+  return False 
+
+def RemoveTheAddedQueryFromKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap):
+  #remove from the hashmap first 
+  value = predicate_hashmap[neg_query_clause_obj.predicate_clause.predicate]
+  if (neg_query_clause_obj.neg == True):
+    last_added_elem = value[NEGATIVE].pop()
+  else:
+    last_added_elem = value[POSITIVE].pop()
+  if last_added_elem != neg_query_clause_obj: #double checking
+    print 'ERROR: We expect last_added_elem to be same as previously added obj, neg_query_clause_obj'
+    exit()
+  #remove from the KB
+  popped_elem = KB_sentences_list.pop()
+  if popped_elem != neg_query_clause_obj: #double checking
+    print 'ERROR: We expect popped_elem to be same as previously added obj, neg_query_clause_obj'
+    exit()
+
+def InspectQuery(query_clause_obj,
+                 KB_sentences_list,
+                 predicate_hashmap,
+                 fd_output
+                ):
+  global CacheVisited
+  CacheVisited = []
+  neg_query_clause_obj = CreateNegQuery(query_clause_obj)
+  AddQueryToKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
+  node_list_predicates = []
+  node_list_predicates.append(neg_query_clause_obj)
+  outcome = FindContradiction(node_list_predicates, predicate_hashmap, fd_output)
+  if (outcome == False):
+    fd_output.write('FALSE\n')
+  RemoveTheAddedQueryFromKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
+
 def main():
   global SETTLED_DOWN
   _input = _Input()
@@ -455,6 +669,15 @@ def main():
   predicate_hashmap = {}
   BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list)
   pprint.pprint(predicate_hashmap)
+  fd_output = open('output.txt', 'w')
+  for i in range(len(_input.total_queries)):
+    InspectQuery(_input.query_list[i], 
+                 KB_sentences_list,
+                 predicate_hashmap,
+                 fd_output)
+
+  fd_output.close()
+
 
 if __name__ == '__main__':
   main()
