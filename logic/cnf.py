@@ -54,25 +54,6 @@ def t_error(t):
 # Build lexer
 lexer = lex.lex()
 
-'''
-# This is to test the Tokenizing
-lexer.input(data) # Give the lexer some input
-
-#TODO: Code cleanup
-# Tokenize
-while True:
-    tok = lexer.token()
-    if not tok: 
-        break      # No more input
-    #print(tok)
-    from pprint import pprint
-    print'--------------------'
-    try:
-      pprint (vars(tok.value))
-    except:
-      print(tok)
-      pass
-'''
 
 ###########################################
 #### YACC: Rules for Parsing are below ####
@@ -361,22 +342,6 @@ def BuildQueryList(_input,lines):
     else:
       clause_object = ClauseObj(None,None,None,predicate_object,False)
     _input.query_list.append(clause_object) 
-    '''if neg_pattern.search(line):
-      match = neg_pattern.search(line)
-`      predicate = match.group(1).strip()
-      args = match.group(2)
-      splitlist = args.split(',')
-      argslist = []
-      for item in splitlist:
-        if (re.search(r'[A-Z]',item)):
-          # means item is constant
-          argslist.append((item.strip(),'CONSTANT'))
-        else:
-          argslist.append((item.strip(),'VARIABLE'))
-      predicate_object = PredicateObj(predicate,argslist,False)
-      clause_object = ClauseObj(None,None,None,predicate_object,True) 
-      _input.query_list.append(clause_object) 
-    elif(pattern.search(line)):'''
 
 def DisplayQueryList(_input):
   for i in range(_input.total_queries):
@@ -422,12 +387,6 @@ def main():
   ParseInputFile(_input)
   DisplayQueryList(_input)
   DisplaySentLineList(_input)
-  '''while 1:
-    try:
-        s = raw_input('logic > ')
-    except EOFError:
-        break
-    if not s: continue'''
   for i in range(_input.total_sent_lines):
         print'\n\n*****************************'
         print'Given Sentence%d: %s'%(i,_input.sent_lines_list[i])
