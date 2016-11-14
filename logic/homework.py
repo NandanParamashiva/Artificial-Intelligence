@@ -487,7 +487,7 @@ def ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicat
         binding_node_list_predicates[pred_args[i][0]] = (copy.deepcopy(sent_args[i][0]),'CONSTANT')
       else:
         #means, sent_args[i][1] was a VARIABLE
-        binding_sentence[sent_args[i][1]] = (copy.deepcopy(pred_args[i][0]),'CONSTANT')
+        binding_sentence[sent_args[i][0]] = (copy.deepcopy(pred_args[i][0]),'CONSTANT')
     elif(pred_args[i][1] == 'VARIABLE'):# TODO: Dont know if we have to do this 
         binding_node_list_predicates[pred_args[i][0]] = (copy.deepcopy(sent_args[i][0]),'VARIABLE')
 
