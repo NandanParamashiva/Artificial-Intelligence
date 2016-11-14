@@ -599,6 +599,7 @@ def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
   return newnode_list_predicates
 
 def CheckCommonSentence(list_list_of_sentence):
+  '''
   common = []
   if (len(list_list_of_sentence) == 0):
     return set(common)
@@ -607,7 +608,17 @@ def CheckCommonSentence(list_list_of_sentence):
   common_set = set(list_list_of_sentence[0])
   for s in list_list_of_sentence[1:]:
       common_set.intersection_update(s)
-  return common_set
+  return common_set'''
+  
+  repeated = set()
+  visited = set()
+  for item in list_list_of_sentence:
+      for i in set(item):
+          if i in visited:
+            repeated.add(i)
+          else:
+            visited.add(i)
+  return repeated
 
 def IsOppositePred(pred_clause_obj1, pred_clause_obj2):
    ''' returns true if they are opposite '''
@@ -654,7 +665,8 @@ def CheckContradictionWithKB(newnode_list_predicates, predicate_hashmap):
       list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][POSITIVE]
     else:
       list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][NEGATIVE]
-    list_list_of_sentence.append(list_of_sentence)
+    if (not(list_of_sentence in list_list_of_sentence)):
+        list_list_of_sentence.append(list_of_sentence)
   common_sent_set = CheckCommonSentence(list_list_of_sentence)
   for item in common_sent_set:
     if (CheckContradictionOfSentences(newnode_list_predicates, item)):
@@ -662,15 +674,78 @@ def CheckContradictionWithKB(newnode_list_predicates, predicate_hashmap):
       return True
   return False
 
-CacheVisited = []
+cache_visited = {}
+# cache for predicate-->[newnode_list_predicates, newnode_list_predicates,..] i.e list of lists
+
+def MatchingArgs(args_newnode, args_already_visited):
+  if (len(args_newnode) != len(args_already_visited)):
+    print'ERROR: We expect len to be same'
+    exit()
+  for i in range(len(args_newnode)):
+    if((args_newnode[i][1]=='VARIABLE') and
+       (args_already_visited[i][1]=='CONSTANT')):
+      # means, conosider it as not visited
+      return False
+    if((args_newnode[i][1]=='CONSTANT') and 
+       (args_already_visited[i][1]=='CONSTANT')):
+       if(args_newnode[i][0] != args_already_visited[i][0]):
+         # means, conosider it as not visited
+         return False 
+  # if here, means, args match with respect to node being visited 
+  # i.e args match , matching the predicate
+  return True
 
 def AlreadyVisited(newnode_list_predicates):
   ''' If All the predicates in the input is visited before, 
       as a node together, i.e same predicates with same args in a node, 
       then we return True. Else we return False '''
   #TODO: 
-  #TODO:
-  return False
+  #We will have to do a manual compare since each newnode_list_predicates is created
+  # for each new recursion. So, cannot just do trivial compare.
+  global cache_visited
+  list_list_of_sentence = []
+  for i in range(len(newnode_list_predicates)):
+    pred = newnode_list_predicates[i].predicate_clause.predicate
+    if (not(pred in cache_visited)):
+      return False
+    if (newnode_list_predicates[i].neg):
+      sentence_list = cache_visited[pred][NEGATIVE]
+    else:
+      sentence_list = cache_visited[pred][POSITIVE]
+    if sentence_list not in list_list_of_sentence:
+      list_list_of_sentence.append(sentence_list)
+  if (len(list_list_of_sentence) == 0):
+    return False
+  sents_visited = CheckCommonSentence(list_list_of_sentence)
+  if (len(sents_visited) == 0):
+    return False
+  for sentence in sents_visited:
+    if (len(newnode_list_predicates) != len(sentence)):
+      return False
+    for i in range(len(newnode_list_predicates)):
+      found_matching_pred = False
+      for j in range(len(sentence)):
+        if(newnode_list_predicates[i].predicate_clause.predicate == sentence[j].predicate_clause.predicate):
+          if (newnode_list_predicates[i].neg == sentence[j].neg):
+            if(MatchingArgs(newnode_list_predicates[i].predicate_clause.args, sentence[j].predicate_clause.args)):
+              found_matching_pred = True
+      if (found_matching_pred==False):
+        return False
+  #If here, means, all predicates matched with neg and args. i.e already visited
+  return True
+
+def UpdateCacheWithNewnodePredList(newnode_list_predicates):
+  global cache_visited
+  for pred_clause_obj in newnode_list_predicates:
+    predicate = pred_clause_obj.predicate_clause.predicate
+    if (not(predicate in cache_visited)):
+        Initialize(cache_visited, predicate)
+    if (pred_clause_obj.neg):
+      if(not(newnode_list_predicates in cache_visited[predicate][NEGATIVE])):
+          cache_visited[predicate][NEGATIVE].append(newnode_list_predicates)
+    else:
+      if(not(newnode_list_predicates in cache_visited[predicate][POSITIVE])):
+          cache_visited[predicate][POSITIVE].append(newnode_list_predicates)
 
 def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
   for predicate_clause_obj in node_list_predicates:
@@ -682,6 +757,7 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       newnode_list_predicates = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
       if (len(newnode_list_predicates) == 0):
         continue
+      UpdateCacheWithNewnodePredList(newnode_list_predicates)
       if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
         fd_output.write('TRUE\n')
         print'TRUE'
