@@ -450,7 +450,7 @@ def GetListFromTree(root, sentence_list):
     return
   GetListFromTree(root.left_clause, sentence_list)
   GetListFromTree(root.right_clause, sentence_list)
-  return
+  return sentence_list
 
 
 def CheckConflictConstants(pred_args, sent_args):
@@ -483,20 +483,20 @@ def ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicat
     exit()
   for i in range(len(pred_args)):
     if (pred_args[i][1] != sent_args[i][1]):
-      if pred_args[i][1] == 'VARIABLE'
-        binding_node_list_predicates[pred_args[i][0]] = (sent_args[i][0],'CONSTANT')
+      if pred_args[i][1] == 'VARIABLE':
+        binding_node_list_predicates[pred_args[i][0]] = (copy.deepcopy(sent_args[i][0]),'CONSTANT')
       else:
         #means, sent_args[i][1] was a VARIABLE
-        binding_sentence[sent_args[i][1]] = (pred_args[i][0],'CONSTANT')
+        binding_sentence[sent_args[i][1]] = (copy.deepcopy(pred_args[i][0]),'CONSTANT')
     elif(pred_args[i][1] == 'VARIABLE'):# TODO: Dont know if we have to do this 
-        binding_node_list_predicates[pred_args[i][0]] = (sent_args[i][0],'VARIABLE')
+        binding_node_list_predicates[pred_args[i][0]] = (copy.deepcopy(sent_args[i][0]),'VARIABLE')
 
 def BuildNewnodeListPredicates(node_list_predicates, 
                                predicate_clause_obj, #predicate in node_list_predicates that needs to be skipped in newnode
                                sentence, 
                                pred_in_sent,# predicate in sentence that needs to be skipped in newnode
                                binding_node_list_predicates, 
-                               binding_sentence)
+                               binding_sentence):
   ''' returns the new node, which is list of predicates clause obj after unification and resolution '''
   newnode_list_predicates = []
   for i in range(len(node_list_predicates)):
@@ -506,15 +506,16 @@ def BuildNewnodeListPredicates(node_list_predicates,
     new_args = []
     for j in range(len(args)):
       arg_tuple = args[j]
-      binding_tuple = binding_node_list_predicates[arg_tuple[0]]
-      if binding_tuple:
-        if binding_tuple[1] == 'CONSTANT':
-          print 'ERROR: can not replace constant'
-          exit()
+      if (arg_tuple[0] in binding_node_list_predicates):
+        binding_tuple = binding_node_list_predicates[arg_tuple[0]]
+        #if binding_tuple[1] == 'CONSTANT':
+        if arg_tuple[1] == 'CONSTANT':
+            print 'ERROR: can not replace constant'
+            exit()
         new_args.append((binding_tuple[0],binding_tuple[1]))
       else:
-        new_args.append(copy.deepcopy(args[j]))
-    p = PredicateObj(node_list_predicates[i].predicate_clause.predicate,new_args,False)
+        new_args.append(copy.deepcopy(arg_tuple))
+    p = PredicateObj(node_list_predicates[i].predicate_clause.predicate, new_args, False)
     c = ClauseObj(None,None,None,p,node_list_predicates[i].neg)
     newnode_list_predicates.append(c)
     #Now do the same for sentence
@@ -525,20 +526,21 @@ def BuildNewnodeListPredicates(node_list_predicates,
     new_args = []
     for j in range(len(args)):
       arg_tuple = args[j]
-      binding_tuple = binding_sentence[arg_tuple[0]]
-      if binding_tuple:
-        if binding_tuple[1] == 'CONSTANT':
-          print 'ERROR: can not replace constant'
-          exit()
+      if (arg_tuple[0] in binding_sentence):
+        binding_tuple = binding_sentence[arg_tuple[0]]
+        #if binding_tuple[1] == 'CONSTANT':
+        if arg_tuple[1] == 'CONSTANT':
+            print 'ERROR: can not replace constant'
+            exit()
         new_args.append((binding_tuple[0],binding_tuple[1]))
       else:
-        new_args.append(copy.deepcopy(args[j]))
+        new_args.append(copy.deepcopy(arg_tuple))
     p = PredicateObj(sentence[i].predicate_clause.predicate,new_args,False)
     c = ClauseObj(None,None,None,p,sentence[i].neg)
     newnode_list_predicates.append(c)
   return newnode_list_predicates
 
-    '''
+  '''
     temp = copy.deepcopy(node_list_predicates[i])
     args = temp.predicate_clause.args
     for i in range(len(args)):
@@ -549,8 +551,32 @@ def BuildNewnodeListPredicates(node_list_predicates,
         temp.predicate_clause.args[0] = binding_node_list_predicates[temp.predicate_clause.args[0]][0]
         temp.predicate_clause.args[1] = binding_node_list_predicates[temp.predicate_clause.args[0]][1]
     newnode_list_predicates.append(temp)'''
+
     
-    
+def TautologyReduce(list_predicates):
+  newnode_list_predicates = []
+  for i in range(len(list_predicates)):
+    found_opposite_predicate = False
+    for j in range(len(list_predicates)):
+      if i == j:
+        continue
+      if list_predicates[j].predicate_clause.predicate == list_predicates[i].predicate_clause.predicate:
+        if list_predicates[j].neg != list_predicates[i].neg:
+          args1 = list_predicates[j].predicate_clause.args 
+          args2 = list_predicates[i].predicate_clause.args
+          if len(args1 == args2):
+            can_unify = True
+            for k in range(len(args1)):
+              if(args1[k][0] != args2[k][0]):
+                # We can not unify this TODO: What about x!=y type??
+                can_unify = False
+            if(can_unify == True):
+              found_opposite_predicate = True
+              break
+    if(found_opposite_predicate == False):
+      newnode_list_predicates.append(list_predicates[i])
+  return newnode_list_predicates
+
 
 def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
   ''' 1. Returns a list i.e newnode_list_predicates after unification/resolution 
@@ -558,18 +584,83 @@ def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
   sentence_list = []
   GetListFromTree(sentence, sentence_list)
   pred_in_sent = PredToUnify(predicate_clause_obj, sentence_list)
+  if pred_in_sent == None:
+    return []
   binding_node_list_predicates = {}
   binding_sentence = {}
   ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence)
-  newnode_list_predicates = BuildNewnodeListPredicates(node_list_predicates, 
+  temp_newnode_list_predicates = BuildNewnodeListPredicates(node_list_predicates, 
                                                        predicate_clause_obj, #predicate in node_list_predicates that needs to be skipped in newnode
-                                                       sentence, 
+                                                       sentence_list, 
                                                        pred_in_sent,# predicate in sentence that needs to be skipped in newnode
                                                        binding_node_list_predicates, 
                                                        binding_sentence)
+  newnode_list_predicates = TautologyReduce(temp_newnode_list_predicates)
+  return newnode_list_predicates
 
-def CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap):
-    ''' Returns True if Contradiction is found '''
+def CheckCommonSentence(list_list_of_sentence):
+  common = []
+  if (len(list_list_of_sentence) == 0):
+    return set(common)
+  if (len(list_list_of_sentence) == 1):
+    return set(list_list_of_sentence[0])
+  common_set = set(list_list_of_sentence[0])
+  for s in list_list_of_sentence[1:]:
+      common_set.intersection_update(s)
+  return common_set
+
+def IsOppositePred(pred_clause_obj1, pred_clause_obj2):
+   ''' returns true if they are opposite '''
+   if(pred_clause_obj1.predicate_clause.predicate != pred_clause_obj2.predicate_clause.predicate):
+     return False
+   if(pred_clause_obj1.neg == pred_clause_obj2.neg):
+     return False
+   args1 = pred_clause_obj1.predicate_clause.args
+   args2 = pred_clause_obj2.predicate_clause.args
+   if(len(args1) != len(args2)):
+     return False
+   for i in range(len(args1)):
+     if ((args1[i][1] == 'CONSTANT') and (args2[i][1] == 'CONSTANT')):
+       #TODO:What for variables??
+       if(args1[i][0] != args2[i][0]):
+         return False
+   return True
+
+def CheckContradictionOfSentences(sent1, sentTree):
+  ''' Returns True :
+      if Pred(const) and ~Pred(const) are there
+      in sent1 and sentTree , for all the pred in sent1 
+      i.e opposite of every predicate
+      Returns False: Otherwise '''
+  sent2 = []
+  GetListFromTree(sentTree, sent2)
+  if len(sent1) != len(sent2):
+    return False
+  for i in range(len(sent1)):
+    found_neg = False
+    for j in range(len(sent2)):
+      if(IsOppositePred(sent1[i], sent2[j])):
+        found_neg = True
+        break
+    if (found_neg == False):
+      return False
+  return True
+
+def CheckContradictionWithKB(newnode_list_predicates, predicate_hashmap):
+  ''' Returns True if Contradiction is found '''
+  list_list_of_sentence = []
+  for i in range(len(newnode_list_predicates)):
+    if newnode_list_predicates[i].neg == True:
+      list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][NEGATIVE]
+    else:
+      list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][POSITIVE]
+    list_list_of_sentence.append(list_of_sentence)
+  common_sent_set = CheckCommonSentence(list_list_of_sentence)
+  for item in common_sent_set:
+    if (CheckContradictionOfSentences(newnode_list_predicates, item)):
+      #Found contradiction
+      return True
+  return False
 
 CacheVisited = []
 
@@ -577,7 +668,9 @@ def AlreadyVisited(newnode_list_predicates):
   ''' If All the predicates in the input is visited before, 
       as a node together, i.e same predicates with same args in a node, 
       then we return True. Else we return False '''
-
+  #TODO: 
+  #TODO:
+  return False
 
 def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
   for predicate_clause_obj in node_list_predicates:
@@ -587,7 +680,7 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][NEGATIVE]
     for i in range(len(list_of_sentences)):
       newnode_list_predicates = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
-      if newnode_list_predicates == None:
+      if (len(newnode_list_predicates) == 0):
         continue
       if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
         fd_output.write('TRUE\n')
@@ -670,7 +763,7 @@ def main():
   BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list)
   pprint.pprint(predicate_hashmap)
   fd_output = open('output.txt', 'w')
-  for i in range(len(_input.total_queries)):
+  for i in range(_input.total_queries):
     InspectQuery(_input.query_list[i], 
                  KB_sentences_list,
                  predicate_hashmap,
