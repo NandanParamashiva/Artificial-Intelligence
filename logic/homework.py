@@ -599,7 +599,6 @@ def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
   return newnode_list_predicates
 
 def CheckCommonSentence(list_list_of_sentence):
-  '''
   common = []
   if (len(list_list_of_sentence) == 0):
     return set(common)
@@ -608,17 +607,26 @@ def CheckCommonSentence(list_list_of_sentence):
   common_set = set(list_list_of_sentence[0])
   for s in list_list_of_sentence[1:]:
       common_set.intersection_update(s)
-  return common_set'''
-  
+  return common_set
+  ''' 
   repeated = set()
   visited = set()
   for item in list_list_of_sentence:
-      for i in set(item):
+      for i in item:
           if i in visited:
             repeated.add(i)
           else:
             visited.add(i)
-  return repeated
+  return repeated'''
+
+  '''d={}
+  for x in list_list_of_sentence:
+    for y in x:
+        if not d.has_key(y):
+          d[y]=0
+        d[y]+=1
+  return [x for x,y in d.iteritems() if y>1]'''
+
 
 def IsOppositePred(pred_clause_obj1, pred_clause_obj2):
    ''' returns true if they are opposite '''
@@ -742,10 +750,10 @@ def UpdateCacheWithNewnodePredList(newnode_list_predicates):
         Initialize(cache_visited, predicate)
     if (pred_clause_obj.neg):
       if(not(newnode_list_predicates in cache_visited[predicate][NEGATIVE])):
-          cache_visited[predicate][NEGATIVE].append(newnode_list_predicates)
+          cache_visited[predicate][NEGATIVE].append(tuple(newnode_list_predicates))
     else:
       if(not(newnode_list_predicates in cache_visited[predicate][POSITIVE])):
-          cache_visited[predicate][POSITIVE].append(newnode_list_predicates)
+          cache_visited[predicate][POSITIVE].append(tuple(newnode_list_predicates))
 
 def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
   for predicate_clause_obj in node_list_predicates:
@@ -762,8 +770,8 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
         fd_output.write('TRUE\n')
         print'TRUE'
         return True
-      if ( AlreadyVisited(newnode_list_predicates) == True):
-        return False
+      #if ( AlreadyVisited(newnode_list_predicates) == True):
+      #  return False
       if(FindContradiction(newnode_list_predicates,predicate_hashmap,fd_output) == True):
         return True
   return False 
