@@ -650,10 +650,10 @@ def CheckContradictionWithKB(newnode_list_predicates, predicate_hashmap):
   ''' Returns True if Contradiction is found '''
   list_list_of_sentence = []
   for i in range(len(newnode_list_predicates)):
-    if newnode_list_predicates[i].neg == True:
-      list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][NEGATIVE]
-    else:
+    if newnode_list_predicates[i].neg == True: #look up in the flip of neg
       list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][POSITIVE]
+    else:
+      list_of_sentence = predicate_hashmap[newnode_list_predicates[i].predicate_clause.predicate][NEGATIVE]
     list_list_of_sentence.append(list_of_sentence)
   common_sent_set = CheckCommonSentence(list_list_of_sentence)
   for item in common_sent_set:
