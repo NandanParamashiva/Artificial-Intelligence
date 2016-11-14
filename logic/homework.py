@@ -684,6 +684,7 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
         continue
       if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
         fd_output.write('TRUE\n')
+        print'TRUE'
         return True
       if ( AlreadyVisited(newnode_list_predicates) == True):
         return False
@@ -764,6 +765,7 @@ def main():
   pprint.pprint(predicate_hashmap)
   fd_output = open('output.txt', 'w')
   for i in range(_input.total_queries):
+    print'query%d:%s'%(i,_input.query_list[i].predicate_clause.predicate), _input.query_list[i].predicate_clause.args
     InspectQuery(_input.query_list[i], 
                  KB_sentences_list,
                  predicate_hashmap,
