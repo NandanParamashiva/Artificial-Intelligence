@@ -787,8 +787,9 @@ def AlreadyVisited(newnode_list_predicates):
   if (len(sents_visited) == 0):
     return False
   for sentence in sents_visited:
+    sentence_matched = True
     if (len(newnode_list_predicates) != len(sentence)):
-      return False
+      continue
     for i in range(len(newnode_list_predicates)):
       found_matching_pred = False
       for j in range(len(sentence)):
@@ -797,9 +798,12 @@ def AlreadyVisited(newnode_list_predicates):
             if(MatchingArgs(newnode_list_predicates[i].predicate_clause.args, sentence[j].predicate_clause.args)):
               found_matching_pred = True
       if (found_matching_pred==False):
-        return False
-  #If here, means, all predicates matched with neg and args. i.e already visited
-  return True
+        sentence_matched = False
+        break
+    if (sentence_matched==True):
+      return True
+  #If here, means, none of the common sentences picked seem to have visited.
+  return False
 
 def UpdateCacheWithNewnodePredList(newnode_list_predicates):
   global cache_visited
