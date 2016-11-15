@@ -765,6 +765,8 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       newnode_list_predicates = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
       if (len(newnode_list_predicates) == 0):
         continue
+      if ( AlreadyVisited(newnode_list_predicates) == True):
+        return False
       UpdateCacheWithNewnodePredList(newnode_list_predicates)
       if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
         fd_output.write('TRUE\n')
@@ -803,6 +805,7 @@ def InspectQuery(query_clause_obj,
   AddQueryToKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
   node_list_predicates = []
   node_list_predicates.append(neg_query_clause_obj)
+  UpdateCacheWithNewnodePredList(node_list_predicates)
   outcome = FindContradiction(node_list_predicates, predicate_hashmap, fd_output)
   if (outcome == False):
     fd_output.write('FALSE\n')
