@@ -713,6 +713,9 @@ def CheckContradictionOfSentences(sent1, sentTree):
         break
     if (found_neg == False):
       return False
+  if DEBUG_ENABLE:
+    debug_print('Contardicting sentence in KB:')
+    PrintPredicateList(sent2)
   return True
 
 def CheckContradictionWithKB(newnode_list_predicates, predicate_hashmap):
