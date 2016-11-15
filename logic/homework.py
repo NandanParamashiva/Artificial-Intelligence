@@ -6,6 +6,8 @@ import re
 import copy
 import pprint
 
+DEBUG_ENABLE = True
+
 data = '''(A(x,John) & ~B(Bob))=> C (x)'''
 
 class PredicateObj(object):
@@ -755,6 +757,28 @@ def UpdateCacheWithNewnodePredList(newnode_list_predicates):
       if(not(newnode_list_predicates in cache_visited[predicate][POSITIVE])):
           cache_visited[predicate][POSITIVE].append(tuple(newnode_list_predicates))
 
+def PrintPredicate(predicate_clause_obj):
+  print '%s%s:'%(('~'if predicate_clause_obj.neg else ''),predicate_clause_obj.predicate_clause.predicate), [arg[0] for arg in predicate_clause_obj.predicate_clause.args],
+
+def PrintPredicateList(list_predicates):
+  for i in range(len(list_predicates)):
+    PrintPredicate(list_predicates[i])
+    print '|',
+  print ''
+
+def DebugResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentences, result):
+  print '@@@@@@DebugResolutionOrUnify@@@@@'
+  print'Unifying Predicate:'
+  PrintPredicate(predicate_clause_obj)
+  print'\nNode:'
+  PrintPredicateList(node_list_predicates)
+  print'KBSentence:'
+  sentence_list = []
+  GetListFromTree(sentences, sentence_list)
+  PrintPredicateList(sentence_list)
+  print 'Newnode:'
+  PrintPredicateList(result)
+  
 def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
   for predicate_clause_obj in node_list_predicates:
     if predicate_clause_obj.neg == True: # IMP: lookup in ~Predicate (i.e flip) 
@@ -763,10 +787,12 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][NEGATIVE]
     for i in range(len(list_of_sentences)):
       newnode_list_predicates = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
+      if DEBUG_ENABLE:
+        DebugResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i], newnode_list_predicates)
       if (len(newnode_list_predicates) == 0):
         continue
       if ( AlreadyVisited(newnode_list_predicates) == True):
-        return False
+        continue
       UpdateCacheWithNewnodePredList(newnode_list_predicates)
       if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
         fd_output.write('TRUE\n')
