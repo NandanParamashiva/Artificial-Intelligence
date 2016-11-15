@@ -857,6 +857,9 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       if (len(newnode_list_predicates) == 0):
         continue
       if ( AlreadyVisited(newnode_list_predicates) == True):
+        if DEBUG_ENABLE:
+          debug_print('Loop detected for newnode_list:')
+          PrintPredicateList(newnode_list_predicates)
         continue
       UpdateCacheWithNewnodePredList(newnode_list_predicates)
       if(len(newnode_list_predicates) == 1): 
