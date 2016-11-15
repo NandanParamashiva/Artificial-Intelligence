@@ -635,7 +635,7 @@ def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
   GetListFromTree(sentence, sentence_list)
   pred_in_sent = PredToUnify(predicate_clause_obj, sentence_list)
   if pred_in_sent == None:
-    return []
+    return [], False
   binding_node_list_predicates = {}
   binding_sentence = {}
   ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence)
@@ -646,7 +646,13 @@ def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
                                                        binding_node_list_predicates, 
                                                        binding_sentence)
   newnode_list_predicates = TautologyReduce(temp_newnode_list_predicates)
-  return newnode_list_predicates
+  if((len(temp_newnode_list_predicates)>1) and 
+     (len(newnode_list_predicates)==0)):# means, newnode list collapsed due to tautology, meaning that the previous newnode list contradicted with the KB.
+      collapsed_due_to_tauto = True
+  else:
+      collapsed_due_to_tauto = False
+  return newnode_list_predicates , collapsed_due_to_tauto 
+
 
 def CheckCommonSentence(list_list_of_sentence):
   common = []
@@ -838,7 +844,14 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
     else:
       list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][NEGATIVE]
     for i in range(len(list_of_sentences)):
-      newnode_list_predicates = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
+      newnode_list_predicates, collapsed_due_to_tauto = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
+      if collapsed_due_to_tauto:
+        if DEBUG_ENABLE:
+          debug_print('Collapsed due to tautology in prev node list:')
+          PrintPredicateList(node_list_predicates)
+        fd_output.write('TRUE\n')
+        print'TRUE'
+        return True
       if DEBUG_ENABLE:
         DebugResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i], newnode_list_predicates)
       if (len(newnode_list_predicates) == 0):
@@ -846,10 +859,12 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       if ( AlreadyVisited(newnode_list_predicates) == True):
         continue
       UpdateCacheWithNewnodePredList(newnode_list_predicates)
-      if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
-        fd_output.write('TRUE\n')
-        print'TRUE'
-        return True
+      if(len(newnode_list_predicates) == 1): 
+        #Note: If a list with more than 1 predicate is in contradiction with the kB, it will be detected in collapsed_due_to_tauto in next loop.
+        if (CheckContradictionWithKB(newnode_list_predicates,predicate_hashmap) == True):
+          fd_output.write('TRUE\n')
+          print'TRUE'
+          return True
       #if ( AlreadyVisited(newnode_list_predicates) == True):
       #  return False
       if(FindContradiction(newnode_list_predicates,predicate_hashmap,fd_output) == True):
