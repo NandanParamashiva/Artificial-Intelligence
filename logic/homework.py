@@ -573,7 +573,7 @@ def TautologyReduce(list_predicates):
         if list_predicates[j].neg != list_predicates[i].neg:
           args1 = list_predicates[j].predicate_clause.args 
           args2 = list_predicates[i].predicate_clause.args
-          if len(args1 == args2):
+          if (len(args1) == len(args2)):
             can_unify = True
             for k in range(len(args1)):
               if(args1[k][0] != args2[k][0]):
