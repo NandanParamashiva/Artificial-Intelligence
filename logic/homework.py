@@ -799,8 +799,8 @@ def InspectQuery(query_clause_obj,
                  predicate_hashmap,
                  fd_output
                 ):
-  global CacheVisited
-  CacheVisited = []
+  global cache_visited
+  cache_visited = {}
   neg_query_clause_obj = CreateNegQuery(query_clause_obj)
   AddQueryToKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
   node_list_predicates = []
@@ -808,6 +808,7 @@ def InspectQuery(query_clause_obj,
   UpdateCacheWithNewnodePredList(node_list_predicates)
   outcome = FindContradiction(node_list_predicates, predicate_hashmap, fd_output)
   if (outcome == False):
+    print 'FALSE'
     fd_output.write('FALSE\n')
   RemoveTheAddedQueryFromKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
 
