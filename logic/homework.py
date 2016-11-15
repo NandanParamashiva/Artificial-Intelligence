@@ -8,6 +8,11 @@ import pprint
 
 DEBUG_ENABLE = True
 
+def debug_print(msg):
+  global DEBUG_ENABLE
+  if DEBUG_ENABLE:
+    print '%s'%msg
+
 data = '''(A(x,John) & ~B(Bob))=> C (x)'''
 
 class PredicateObj(object):
@@ -170,6 +175,8 @@ def PrintTreeTraversal(root):
 
 
 def DisplayTree(result):
+  global DEBUG_ENABLE
+  if DEBUG_ENABLE:  
     finaloutput = PrintTreeTraversal(result)
     for char in finaloutput:
       if char == '[' or char == ']':
@@ -780,6 +787,7 @@ def DebugResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentences
   PrintPredicateList(result)
   
 def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
+  global DEBUG_ENABLE
   for predicate_clause_obj in node_list_predicates:
     if predicate_clause_obj.neg == True: # IMP: lookup in ~Predicate (i.e flip) 
       list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][POSITIVE]
@@ -840,40 +848,42 @@ def InspectQuery(query_clause_obj,
 
 def main():
   global SETTLED_DOWN
+  global DEBUG_ENABLE
   _input = _Input()
   ParseInputFile(_input)
-  DisplayQueryList(_input)
-  DisplaySentLineList(_input)
+  if DEBUG_ENABLE:
+    DisplayQueryList(_input)
+    DisplaySentLineList(_input)
   KB_sentences_list = []
   global given_sentences_root
   for i in range(_input.total_sent_lines):
-        print'\n\n----------------------------'
-        print'Given Sentence%d: %s'%(i,_input.sent_lines_list[i])
+        debug_print('\n\n----------------------------')
+        debug_print('Given Sentence%d: %s'%(i,_input.sent_lines_list[i]))
         root = yacc.parse(_input.sent_lines_list[i])
         #from pprint import pprint
         #pprint (vars(result))
         MoveNegDownTheTree(root)
-        print'----------------------------'
-        print'Before Distributing | over &'
+        debug_print('----------------------------')
+        debug_print('Before Distributing | over &')
         DisplayTree(root)
         #print'----------------------------'
         SETTLED_DOWN = False
         while (SETTLED_DOWN == False):
           SETTLED_DOWN = True
           ConvertToCNF(root)
-        print'----------------------------'
-        print'After Distributing | over &'
+        debug_print('----------------------------')
+        debug_print('After Distributing | over &')
         DisplayTree(root)
         #print'----------------------------'
         #RoughDisplaySentences(root)
         #KB_sentences_list = []
         BuildSentences(root,KB_sentences_list)
         given_sentences_root.append(root)
-  print'*****************************'
-  print'Sentences:'
+  debug_print('*****************************')
+  debug_print('Sentences:')
   for i in range(len(KB_sentences_list)):
     DisplayTree(KB_sentences_list[i])
-  print'*****************************'
+  debug_print('*****************************')
   predicate_hashmap = {}
   BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list)
   #pprint.pprint(predicate_hashmap)
