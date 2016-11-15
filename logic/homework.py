@@ -561,6 +561,46 @@ def BuildNewnodeListPredicates(node_list_predicates,
         temp.predicate_clause.args[1] = binding_node_list_predicates[temp.predicate_clause.args[0]][1]
     newnode_list_predicates.append(temp)'''
 
+def IsDuplicatePredicate(pred1_obj, pred2_obj):
+  ''' Returns true both predicate match exactly '''
+  if(pred1_obj.neg != pred2_obj.neg):
+    return False
+  if(pred1_obj.predicate_clause.predicate != pred2_obj.predicate_clause.predicate):
+    return False
+  args1 = pred1_obj.predicate_clause.args
+  args2 = pred2_obj.predicate_clause.args
+  if (len(args1) != len(args2)):
+    return False
+  for i in range(len(args1)):
+    if(args1[i][0] != args2[i][0]):
+      return False
+  return True
+
+def RemoveDuplicates(list_pred):
+  freshlist = []
+  if ((list_pred == None) or (len(list_pred)==0)):
+    return list_pred
+  if (len(list_pred) == 1):
+    return list_pred
+  if (len(list_pred) == 2):
+    if( IsDuplicatePredicate(list_pred[0], list_pred[1]) ):
+      freshlist.append(list_pred[0])
+      return freshlist
+    else:
+      return list_pred
+  else:
+    #Accordint to this logic, last elem is always included
+    freshlist.append(list_pred[-1])
+    for i in range(len(list_pred)-1):
+      found_dup = False
+      for j in range(i+1, len(list_pred)):
+        if(IsDuplicatePredicate(list_pred[i],list_pred[j])):
+          found_dup = True
+          break
+      if(found_dup == False):
+        freshlist.append(list_pred[i])
+  return freshlist
+
     
 def TautologyReduce(list_predicates):
   newnode_list_predicates = []
@@ -584,7 +624,8 @@ def TautologyReduce(list_predicates):
               break
     if(found_opposite_predicate == False):
       newnode_list_predicates.append(list_predicates[i])
-  return newnode_list_predicates
+  freshlist = RemoveDuplicates(newnode_list_predicates)
+  return freshlist
 
 
 def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
