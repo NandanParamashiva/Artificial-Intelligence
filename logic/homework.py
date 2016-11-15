@@ -850,7 +850,7 @@ def main():
   print'*****************************'
   predicate_hashmap = {}
   BuildHashMapOfPredicates(predicate_hashmap, KB_sentences_list)
-  pprint.pprint(predicate_hashmap)
+  #pprint.pprint(predicate_hashmap)
   fd_output = open('output.txt', 'w')
   for i in range(_input.total_queries):
     print'query%d:%s'%(i,_input.query_list[i].predicate_clause.predicate), _input.query_list[i].predicate_clause.args
