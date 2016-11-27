@@ -6,7 +6,7 @@ import re
 import copy
 import pprint
 
-DEBUG_ENABLE = True
+DEBUG_ENABLE = False
 
 def debug_print(msg):
   global DEBUG_ENABLE
@@ -484,7 +484,9 @@ def PredToUnify(predicate_clause_obj, sentence_list):
   return None
 
 def ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence):
-  ''' populates the var/const binding in binding_node_list_predicates , binding_sentence '''
+  ''' 1. Populates the var/const binding in binding_node_list_predicates , binding_sentence 
+      2. PredToUnify() would have identified if these 2 are unifiable. No need to check here again
+         Therefore, assume predicate_clause_obj and pred_in_sent are unifiable '''
   pred_args = predicate_clause_obj.predicate_clause.args
   sent_args = pred_in_sent.predicate_clause.args
   if(len(pred_args) != len(sent_args)):
@@ -617,7 +619,7 @@ def TautologyReduce(list_predicates):
             can_unify = True
             for k in range(len(args1)):
               if(args1[k][0] != args2[k][0]):
-                # We can not unify this TODO: What about x!=y type??
+                # Every Variable and constant should match to tautology reduce.
                 can_unify = False
             if(can_unify == True):
               found_opposite_predicate = True
@@ -697,16 +699,17 @@ def IsOppositePred(pred_clause_obj1, pred_clause_obj2):
    for i in range(len(args1)):
      if ((args1[i][1] == 'CONSTANT') and (args2[i][1] == 'CONSTANT')):
        #TODO:What for variables??
+       # I think what we are doing now is fine.
        if(args1[i][0] != args2[i][0]):
          return False
    return True
 
 def CheckContradictionOfSentences(sent1, sentTree):
-  ''' Returns True :
-      if Pred(const) and ~Pred(const) are there
-      in sent1 and sentTree , for all the pred in sent1 
-      i.e opposite of every predicate
-      Returns False: Otherwise '''
+  ''' 1. Returns True :
+         if Pred(const) and ~Pred(const) are there
+         in sent1 and sentTree , for all the pred in sent1 
+         i.e opposite of every predicate. (Note: len of both should match)
+      2. Returns False: Otherwise '''
   sent2 = []
   GetListFromTree(sentTree, sent2)
   if len(sent1) != len(sent2):
