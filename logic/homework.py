@@ -6,7 +6,8 @@ import re
 import copy
 import pprint
 
-DEBUG_ENABLE = True
+DEBUG_ENABLE = False
+STANDARDIZE_KB_COUNT = 1
 
 def debug_print(msg):
   global DEBUG_ENABLE
@@ -915,9 +916,37 @@ def InspectQuery(query_clause_obj,
     fd_output.write('FALSE\n')
   RemoveTheAddedQueryFromKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
 
+def StandardizeArgs(args):
+  global STANDARDIZE_KB_COUNT
+  new_args = []
+  for i in range(len(args)):
+    arg_tuple = args[i]
+    if arg_tuple[1] == 'VARIABLE':
+      new_variable = '%s'%(arg_tuple[0])+'%d'%(STANDARDIZE_KB_COUNT)
+      new_args.append((new_variable.strip(),'VARIABLE'))
+    else:
+      new_args.append(arg_tuple)
+  return new_args
+
+def StandardizeVariables(root):
+  if root == None:
+    return
+  elif(root.operator == None):
+    if(root.predicate_clause != None):
+      root.predicate_clause.args = StandardizeArgs(root.predicate_clause.args)
+      return
+    else:
+      print'Error:Leaf node should be having predicate clause'
+      exit()
+  else:
+    #If here means, root op is not None
+    StandardizeVariables(root.left_clause)
+    StandardizeVariables(root.right_clause)
+
 def main():
   global SETTLED_DOWN
   global DEBUG_ENABLE
+  global STANDARDIZE_KB_COUNT
   _input = _Input()
   ParseInputFile(_input)
   if DEBUG_ENABLE:
@@ -947,6 +976,9 @@ def main():
         #RoughDisplaySentences(root)
         BuildSentences(root,KB_sentences_list)
         given_sentences_root.append(root)
+  for i in range(len(KB_sentences_list)):
+    StandardizeVariables(KB_sentences_list[i])
+    STANDARDIZE_KB_COUNT = (STANDARDIZE_KB_COUNT + 1)
   debug_print('*****************************')
   debug_print('KB Sentences:')
   for i in range(len(KB_sentences_list)):
