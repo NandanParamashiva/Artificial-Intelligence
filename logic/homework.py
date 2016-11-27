@@ -6,7 +6,7 @@ import re
 import copy
 import pprint
 
-DEBUG_ENABLE = False
+DEBUG_ENABLE = True
 
 def debug_print(msg):
   global DEBUG_ENABLE
@@ -945,11 +945,10 @@ def main():
         DisplayTree(root)
         #print'----------------------------'
         #RoughDisplaySentences(root)
-        #KB_sentences_list = []
         BuildSentences(root,KB_sentences_list)
         given_sentences_root.append(root)
   debug_print('*****************************')
-  debug_print('Sentences:')
+  debug_print('KB Sentences:')
   for i in range(len(KB_sentences_list)):
     DisplayTree(KB_sentences_list[i])
   debug_print('*****************************')
