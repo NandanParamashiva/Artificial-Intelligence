@@ -1,0 +1,8 @@
+1
+D(Bob)
+5
+E(Bob)
+A(x)&B(x)=>C(x)
+C(x)=>D(x)
+~A(x) => B(x)
+E(x)=>A(x)

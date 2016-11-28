@@ -1,0 +1,8 @@
+1
+D(Bob)
+5
+A(x,y)=>B(x)
+B(x)=>C(x)
+C(x)=>A(x,y)
+C(x)=>D(x)
+A(Bob, y)
