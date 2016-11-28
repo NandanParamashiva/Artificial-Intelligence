@@ -14,6 +14,8 @@ OutputFile = 'output.txt'
 #directories = ('BACKUP_BFS',)
 
 import errno
+
+COUNT = 0
  
 def copy(src, dest):
     try:
@@ -64,6 +66,8 @@ def main():
       try:
         print './homework.py'
         os.system('./homework.py')
+        global COUNT
+        COUNT = COUNT +1
       except:
         print 'Error in executing %s'%filename
         exit()
@@ -82,3 +86,4 @@ def main():
 
 if __name__ == '__main__':
   main()
+  print 'Total TestCases = %d'%COUNT
