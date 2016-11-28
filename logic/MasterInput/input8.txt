@@ -1,0 +1,10 @@
+1
+Sibling(Sally, Erica)
+7
+Mother_child(Trude, Sally)
+Father_child(Tom, Sally)
+Father_child(Tom, Erica)
+Father_child(Mike, Tom)
+Parent_child(z, x) & Parent_child(z, y) => Sibling(x, y)
+Father_child(x,y) => Parent_child(x, y)
+Mother_child(x,y) => Parent_child(x, y)

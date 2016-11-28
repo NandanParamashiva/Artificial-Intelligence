@@ -1,0 +1,10 @@
+1
+~M(Ellen)
+7
+S(x) | M(x)
+~M(x) | ~L(x, Rain)
+~S(x) | L(x, Snow)
+~L(Tony, x) | ~L(Ellen, x)
+L(Tony, x) | L(Ellen, x)
+L(Tony, Rain)
+L(Tony, Snow)

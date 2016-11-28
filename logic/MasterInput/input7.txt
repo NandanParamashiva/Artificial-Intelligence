@@ -1,0 +1,5 @@
+1
+Hates(John, Jim)
+2
+~Knows (John, x) | Hates (John, x)
+Knows (John, Jim)
