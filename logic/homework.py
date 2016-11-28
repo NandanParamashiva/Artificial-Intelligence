@@ -853,13 +853,14 @@ def FindContradiction(node_list_predicates, predicate_hashmap, fd_output):
       list_of_sentences = predicate_hashmap[predicate_clause_obj.predicate_clause.predicate][NEGATIVE]
     for i in range(len(list_of_sentences)):
       newnode_list_predicates, collapsed_due_to_tauto = ResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i])
-      if collapsed_due_to_tauto:
+      #Note: Bug Fix- If collapsed_due_to_tauto is True that means we could not contradict, hence move on.
+      '''if collapsed_due_to_tauto:
         if DEBUG_ENABLE:
           debug_print('Collapsed due to tautology in prev node list:')
           PrintPredicateList(node_list_predicates)
         fd_output.write('TRUE\n')
         print'TRUE'
-        return True
+        return True'''
       if DEBUG_ENABLE:
         DebugResolutionOrUnify(predicate_clause_obj,node_list_predicates,list_of_sentences[i], newnode_list_predicates)
       if (len(newnode_list_predicates) == 0):
