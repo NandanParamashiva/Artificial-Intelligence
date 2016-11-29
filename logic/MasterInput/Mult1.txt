@@ -1,0 +1,4 @@
+1
+B(Bob,Bob,Bob,Bob,Bob,Bob,Bob,Bob,Bob,Bob)
+1
+B(Bob,x,y,z,l,n,n,x,x,x)|B(Bob,x,y,z,l,n,n,x,x,x)

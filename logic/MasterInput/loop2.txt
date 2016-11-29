@@ -1,0 +1,11 @@
+1
+B(Bob)
+8
+(A(x)=>B(x))
+((E(x)&D(x))=>(A(x)|C(x)))
+(B(x)=>S(x))
+(E(x))
+(F(Bob)=>D(Bob))
+F(Bob)
+S(x)=>T(Bob)
+T(Bob)=>A(x)

@@ -1,0 +1,9 @@
+3
+Bb(John, Bob)
+Bb(Bob)
+Bb(John,John)
+4
+Dd(x,x)=>Cc(z,z)
+Aa(x,y)=>Bb(y,x)
+Dd(x,x)
+Cc(x,y)=>Aa(x,y)

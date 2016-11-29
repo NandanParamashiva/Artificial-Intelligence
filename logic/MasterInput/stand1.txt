@@ -1,0 +1,7 @@
+1
+~D(John)
+4
+~D(l)|A(x,y)|B(x,z)
+~A(z,John)|C(z,x)
+~B(John,Bob)
+~C(John, Appy)

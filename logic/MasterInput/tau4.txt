@@ -1,0 +1,13 @@
+5
+A(Bob)
+C(John)
+S(Happy)
+~T(Ant)
+M(Anny)
+6
+A(Bob)|A(Bob)|A(Bob)
+C(John)|C(John)
+S(Happy)&S(Happy)
+~T(Ant)|(~HH(Alice)|HH(Alice))
+M(Anny)|M(Anny)|M(Anny)|N(Cat)|N(Cat)
+~N(Cat)

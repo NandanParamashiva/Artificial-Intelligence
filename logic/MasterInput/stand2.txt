@@ -1,0 +1,13 @@
+4
+A(Joy, Joy, Joy, Joy)
+C(Cat,Buf,Cat,Buf)
+C(Cat,Buf,Cat,Cat)
+B(Boy,Girl,Boy)
+7
+A(Joy,Joy,Joy,Joy)|~A(Joy,Joy,Joy,Joy)
+A(Joy,x, Joy,y)
+B(x,Boy,z)
+D(Milk)=>C(x,x,Cat,Buf)
+D(x)
+C(x,x,Cat,Buf) => GG(x,y,Sugar)
+GG(x,y,Sugar)=> D(Milk)

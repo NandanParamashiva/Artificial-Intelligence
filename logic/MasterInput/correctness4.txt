@@ -1,0 +1,10 @@
+3
+H(John, Bob)
+I(Bob)
+J(Bob)
+5
+G(Bob,x)=>H(John,Bob)
+E(John)=>G(x,y)
+(I(Bob)|J(John))=>E(John)
+I(x)
+~J(x)

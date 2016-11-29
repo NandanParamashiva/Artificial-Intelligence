@@ -1,0 +1,12 @@
+3
+H(John, Bob)
+I(Bob)
+J(Bob)
+7
+G(Bob,x)=>H(John,Bob)
+H(John,Bob)=>TT(x)&SS(y)
+TT(x)&SS(y) => G(Bob,x)
+E(John)=>G(x,y)
+(I(Bob)|J(John))=>E(John)
+I(x)
+~J(x)

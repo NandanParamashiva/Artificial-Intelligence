@@ -1,0 +1,8 @@
+1
+(A(JJ))
+5
+B(JJ)=>A(JJ)
+C(AA)=>B(x)
+D(AA)=>B(JJ)
+D(AA)=>C(AA)
+D(AA)

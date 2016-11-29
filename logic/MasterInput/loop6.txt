@@ -1,0 +1,9 @@
+1
+~B(Bob)
+6
+~A(x,y)=>~B(y)
+~D(y,x)=>((~A(y,x))&E(SHY))
+E(SHY)=>((~D(y,Bob))|F(Bob))
+E(SHY)
+E(SHY)=>E(SHY)
+F(Bob)

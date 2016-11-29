@@ -1,0 +1,12 @@
+2
+B(Bob)
+A(John)
+7
+(A(x)=>B(x))|(A(x)=>B(x))
+((E(x)&D(x))=>(A(x)&C(x)))
+(B(x)=>A(x))&(B(x)=>A(x))
+(E(x)|(E(x)|E(x)))
+(F(Bob)=>D(Bob))
+F(Bob)&F(Bob)
+D(Bob)=>F(Bob)
+

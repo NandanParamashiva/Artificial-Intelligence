@@ -1,0 +1,5 @@
+1
+D(John)
+2
+A(x)=>D(John)
+~D(John)

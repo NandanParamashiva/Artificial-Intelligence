@@ -1,0 +1,10 @@
+1
+~B(Bob)
+7
+~A(x,y)=>~B(y)
+~B(y)=>~HH(Cat)
+~HH(x)=>~A(x,y)
+~D(y,x)=>((~A(y,x))&E(SHY))
+E(SHY)=>((~D(y,Bob))|F(Bob))
+E(SHY)
+~F(Bob)

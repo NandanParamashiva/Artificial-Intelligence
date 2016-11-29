@@ -1,0 +1,7 @@
+1
+D(John)
+4
+A(x)=>D(John)
+~D(John)
+D(John)=>TT(John)
+TT(John)=>A(x)

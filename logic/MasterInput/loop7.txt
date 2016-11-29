@@ -1,0 +1,9 @@
+1
+D(John)
+6
+A(x)&B(y)=>C(x)|D(y)
+A(x)&B(y)=>~C(x)
+A(Bob)&B(John)
+A(Bob)=> TT(x)
+TT(x)=>ZZ(r)
+ZZ(a)=>A(Bob)

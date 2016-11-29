@@ -1,0 +1,10 @@
+4
+A(Bob)
+C(John)
+S(Happy)
+~T(Ant)
+4
+A(Bob)|A(Bob)|~A(Bob)
+C(John)|~C(John)
+~S(Happy)&~S(Happy)
+T(Ant)|(~HH(Alice)|HH(Alice))

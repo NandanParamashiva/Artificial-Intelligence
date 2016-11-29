@@ -1,0 +1,10 @@
+2
+B(Bob)
+A(John)
+6
+(A(x)=>B(x))
+((E(x)&D(x))=>(A(x)&C(x)))
+(B(x)=>A(x))
+(E(x))
+(F(Bob)=>D(Bob))
+F(Bob)

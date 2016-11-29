@@ -1,0 +1,13 @@
+4
+B(Bob)
+A(John)
+E(Alice)
+(~E(Alice))
+7
+(A(x)=>B(x))
+((E(x)&D(x))=>(A(x)&C(x)))
+A(x)&C(x) => E(x)&D(x)
+(B(x)=>A(x))&(B(x)=>A(x))
+(E(x)&E(x)|E(x))
+(F(Bob)=>D(Bob))
+F(Bob)|F(Bob)

@@ -1,5 +1,5 @@
 1
-(~M(Ellen))
+M(Ellen)
 7
 (S(x) | M(x))
 ((~M(x)) | (~L(x, Rain)))

@@ -1,0 +1,6 @@
+1
+A(Joy, Joy, Joy, Joy)
+2
+A(Joy,Joy,Joy,Joy)|~A(Joy,Joy,Joy,Joy)
+A(Joy,x, Joy,y)
+

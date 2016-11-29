@@ -1,0 +1,7 @@
+1
+D(John)
+3
+A(x)&B(y)=>C(x)|D(y)
+A(x)&B(y)=>~C(x)
+A(Bob)&B(John)
+
