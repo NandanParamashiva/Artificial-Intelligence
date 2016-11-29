@@ -707,6 +707,8 @@ def CheckCommonSentence(list_list_of_sentence):
 
 def IsOppositePred(pred_clause_obj1, pred_clause_obj2):
    ''' returns true if they are opposite '''
+   arg1_map = {}
+   arg2_map = {}
    if(pred_clause_obj1.predicate_clause.predicate != pred_clause_obj2.predicate_clause.predicate):
      return False
    if(pred_clause_obj1.neg == pred_clause_obj2.neg):
@@ -721,6 +723,18 @@ def IsOppositePred(pred_clause_obj1, pred_clause_obj2):
        # I think what we are doing now is fine.
        if(args1[i][0] != args2[i][0]):
          return False
+     elif((args1[i][1] == 'VARIABLE') and (args2[i][1] == 'CONSTANT')):
+       if(args1[i][0] in arg1_map):
+         if(arg1_map[args1[i][0]] != args2[i][0]):
+           return False
+       else:
+         arg1_map[args1[i][0]] = args2[i][0]
+     elif((args1[i][1] == 'CONSTANT') and (args2[i][1] == 'VARIABLE')):
+       if(args2[i][0] in arg2_map):
+         if(arg2_map[args2[i][0]] != args1[i][0]):
+           return False
+       else:
+         arg2_map[args2[i][0]] = args1[i][0]
    return True
 
 def CheckContradictionOfSentences(sent1, sentTree):
@@ -728,12 +742,20 @@ def CheckContradictionOfSentences(sent1, sentTree):
          if Pred(const) and ~Pred(const) are there
          in sent1 and sentTree , for all the pred in sent1 
          i.e opposite of every predicate. (Note: len of both should match)
-      2. Returns False: Otherwise '''
+      2. Returns False: Otherwise 
+      3. NOTE: This checks contradiction of sent1 and sentTree if both are of len 1
+               else, this will return False '''
   old_sent2 = []
   GetListFromTree(sentTree, old_sent2)
   sent2 = []
   sent2 = TautologyReduce(old_sent2)
   if len(sent1) != len(sent2):
+    return False
+  if((len(sent1)!=1) or (len(sent2)!=1)):
+    # We contradict only one predicate at a time
+    # Note A(x)|B(y) is not in contradiction with ~A(x)|~B(y)
+    # But it is in contradiction with ~(A(x)&B(y)). But this & operator will not
+    # appear either in new node or in sentences in KB. Hence this check.
     return False
   for i in range(len(sent1)):
     found_neg = False
