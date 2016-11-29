@@ -911,6 +911,13 @@ def InspectQuery(query_clause_obj,
   node_list_predicates = []
   node_list_predicates.append(neg_query_clause_obj)
   UpdateCacheWithNewnodePredList(node_list_predicates)
+  # First check if the given query is already in contradiction with the KB
+  if (CheckContradictionWithKB(node_list_predicates,predicate_hashmap) == True):
+    fd_output.write('TRUE\n')
+    print'TRUE'
+    RemoveTheAddedQueryFromKB(neg_query_clause_obj, KB_sentences_list, predicate_hashmap)
+    return 
+  #Start the DFS search to try to prove the contradiction
   outcome = FindContradiction(node_list_predicates, predicate_hashmap, fd_output)
   if (outcome == False):
     print 'FALSE'
