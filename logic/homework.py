@@ -487,7 +487,9 @@ def PredToUnify(predicate_clause_obj, sentence_list):
 def ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence):
   ''' 1. Populates the var/const binding in binding_node_list_predicates , binding_sentence 
       2. PredToUnify() would have identified if these 2 are unifiable. No need to check here again
-         Therefore, assume predicate_clause_obj and pred_in_sent are unifiable '''
+         Therefore, assume predicate_clause_obj and pred_in_sent are unifiable 
+      3. It returns False, if we find conflicting var-->constant mapping. i.e we cannot unify.
+         It returns True, if we could unify '''
   pred_args = predicate_clause_obj.predicate_clause.args
   sent_args = pred_in_sent.predicate_clause.args
   if(len(pred_args) != len(sent_args)):
@@ -495,13 +497,25 @@ def ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicat
     exit()
   for i in range(len(pred_args)):
     if (pred_args[i][1] != sent_args[i][1]):
+      # variable<-->constant
       if pred_args[i][1] == 'VARIABLE':
+        # if here means, pred_args[i][1] is VARIABLE and sent_args[i][1] is CONSTANT
+        if pred_args[i][0] in binding_node_list_predicates:
+          if(binding_node_list_predicates[pred_args[i][0]][0] != sent_args[i][0]):
+            # Cannot unify
+            return False
         binding_node_list_predicates[pred_args[i][0]] = (copy.deepcopy(sent_args[i][0]),'CONSTANT')
       else:
-        #means, sent_args[i][1] was a VARIABLE
+        #means, sent_args[i][1] is VARIABLE and pred_args[i][1] is CONSTANT
+        if sent_args[i][0] in binding_sentence:
+          if(binding_sentence[sent_args[i][0]][0] != pred_args[i][0]):
+            # Cannot unify
+            return False
         binding_sentence[sent_args[i][0]] = (copy.deepcopy(pred_args[i][0]),'CONSTANT')
     elif(pred_args[i][1] == 'VARIABLE'):# TODO: Dont know if we have to do this 
         binding_node_list_predicates[pred_args[i][0]] = (copy.deepcopy(sent_args[i][0]),'VARIABLE')
+  return True
+
 
 def BuildNewnodeListPredicates(node_list_predicates, 
                                predicate_clause_obj, #predicate in node_list_predicates that needs to be skipped in newnode
@@ -643,7 +657,9 @@ def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
     return [], False
   binding_node_list_predicates = {}
   binding_sentence = {}
-  ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence)
+  bool_val = ChangesToArgs(predicate_clause_obj, pred_in_sent, binding_node_list_predicates, binding_sentence)
+  if (bool_val == False):
+    return [], False
   temp_newnode_list_predicates = BuildNewnodeListPredicates(node_list_predicates, 
                                                        predicate_clause_obj, #predicate in node_list_predicates that needs to be skipped in newnode
                                                        sentence_list, 
