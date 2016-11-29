@@ -634,8 +634,10 @@ def TautologyReduce(list_predicates):
 def ResolutionOrUnify(predicate_clause_obj, node_list_predicates, sentence):
   ''' 1. Returns a list i.e newnode_list_predicates after unification/resolution 
       2. The returning list will be tatutology simplified '''
+  old_sentence_list = []
+  GetListFromTree(sentence, old_sentence_list)
   sentence_list = []
-  GetListFromTree(sentence, sentence_list)
+  sentence_list = TautologyReduce(old_sentence_list)
   pred_in_sent = PredToUnify(predicate_clause_obj, sentence_list)
   if pred_in_sent == None:
     return [], False
@@ -711,8 +713,10 @@ def CheckContradictionOfSentences(sent1, sentTree):
          in sent1 and sentTree , for all the pred in sent1 
          i.e opposite of every predicate. (Note: len of both should match)
       2. Returns False: Otherwise '''
+  old_sent2 = []
+  GetListFromTree(sentTree, old_sent2)
   sent2 = []
-  GetListFromTree(sentTree, sent2)
+  sent2 = TautologyReduce(old_sent2)
   if len(sent1) != len(sent2):
     return False
   for i in range(len(sent1)):
