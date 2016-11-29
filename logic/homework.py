@@ -344,8 +344,6 @@ def BuildQueryList(_input,lines):
   #neg_pattern = r'\s*~\s*\(?([A-Z]\w*)\s*\(([^&\|=>\)]+)\)'
   for linenum in range(1, _input.total_queries+1):
     line = lines[linenum]
-    clause_object = yacc.parse(line)
-    '''
     predicate_object = BuildPredicateObj(line,pattern)
     if (predicate_object == None):
       print 'ERROR: Error in query %s'%line
@@ -354,7 +352,6 @@ def BuildQueryList(_input,lines):
       clause_object = ClauseObj(None,None,None,predicate_object,True)
     else:
       clause_object = ClauseObj(None,None,None,predicate_object,False)
-    '''
     _input.query_list.append(clause_object) 
 
 def DisplayQueryList(_input):
